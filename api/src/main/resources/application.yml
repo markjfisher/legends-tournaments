@@ -1,3 +1,13 @@
+---
 micronaut:
   application:
     name: api
+---
+tournament:
+  datastore:
+    projectid: legends-tournaments
+    namespace: testing
+  security:
+    endpoints:
+      username: ${SECRET_USERNAME:unused}
+      password: ${SECRET_PASSWORD:unused}

@@ -1,4 +1,4 @@
-rootProject.name = "legends-tournament-app"
+rootProject.name = "legends-tournaments-app"
 
 include(
     "api"

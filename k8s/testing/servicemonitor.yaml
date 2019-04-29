@@ -1,0 +1,9 @@
+kind: ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  name: testing-legends-tournaments
+spec:
+  selector:
+    matchLabels:
+      app: legends-tournaments
+      environment: testing

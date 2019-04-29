@@ -27,6 +27,11 @@ val assertJVersion: String by project
 val mockkVersion: String by project
 val logbackEncoderVersion: String by project
 val okHttpVerison: String by project
+val googleCloudDatastoreVersion: String by project
+val googleOAuthHTTPVersion: String by project
+
+val easyRulesCoreVersion: String by project
+val elderscrollsLegendsSdkJavaVersion: String by project
 
 dependencies {
     implementation("io.micronaut:micronaut-http-client")
@@ -41,15 +46,21 @@ dependencies {
     implementation("io.micronaut.configuration:micronaut-hibernate-validator")
     implementation("io.micronaut:micronaut-security")
 
+    implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
+
+    implementation("net.markjfisher:elderscrolls-legends-sdk-java:$elderscrollsLegendsSdkJavaVersion")
+    implementation("org.jeasy:easy-rules-core:$easyRulesCoreVersion")
+    implementation("org.jeasy:easy-rules-mvel:$easyRulesCoreVersion")
+
+    implementation("com.google.cloud:google-cloud-datastore:$googleCloudDatastoreVersion")
+    implementation("com.google.auth:google-auth-library-oauth2-http:$googleOAuthHTTPVersion")
+
+
     kapt("io.micronaut.configuration:micronaut-openapi")
     kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-validation")
     kapt("io.micronaut:micronaut-security")
-
-    kaptTest("io.micronaut:micronaut-inject-java")
-
-    implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
 
     testImplementation("io.micronaut.test:micronaut-test-junit5:$micronautJunit")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion")
@@ -62,7 +73,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.squareup.okhttp3:okhttp:$okHttpVerison")
-    
+
+    kaptTest("io.micronaut:micronaut-inject-java")
 }
 
 tasks {

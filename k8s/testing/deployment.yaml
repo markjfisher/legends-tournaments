@@ -1,0 +1,101 @@
+kind: Deployment
+apiVersion: apps/v1beta1
+metadata:
+  name: testing-legends-tournaments
+  labels:
+    app: legends-tournaments
+    environment: testing
+spec:
+  replicas: 2
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app: legends-tournaments
+      environment: testing
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: legends-tournaments
+        environment: testing
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 101
+        runAsNonRoot: true
+      containers:
+      - name: legends-tournaments
+        image: ${DOCKER_IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsUser: 101
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: secret
+          mountPath: /etc/secret
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/secret/legends-tournaments-testing-service-account-key.json
+        - name: MICRONAUT_ENVIRONMENTS
+          value: testing
+        - name: JAVA_OPTS
+          value: "-Xms128M -Xmx128M -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+        - name: SECRET_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: basicauth
+              key: username
+        - name: SECRET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: basicauth
+              key: password
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          timeoutSeconds: 5
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+      - name: secret
+        secret:
+          secretName: legends-tournaments-testing
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: legends-tournaments
+                  environment: testing
+              topologyKey: failure-domain.beta.kubernetes.io/zone
