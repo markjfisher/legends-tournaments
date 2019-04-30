@@ -7,6 +7,7 @@ import javax.inject.Singleton
 interface TournamentService {
     fun getTournamentById(id: String): Tournament?
     fun getTournaments(): List<Tournament>
+    fun saveTournament(tournament: Tournament): Tournament
 }
 
 @Singleton
@@ -19,4 +20,7 @@ class DefaultTournamentService(private val repository: TournamentEntityRepositor
         return repository.getAllTournaments()
     }
 
+    override fun saveTournament(tournament: Tournament): Tournament {
+        return repository.saveTournament(tournament)
+    }
 }

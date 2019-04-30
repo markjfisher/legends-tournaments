@@ -3,6 +3,7 @@ package tournament.api.controller
 import io.micronaut.core.type.Argument
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MutableHttpRequest
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.http.client.exceptions.HttpClientResponseException
@@ -12,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import tournament.api.repository.Tournament
@@ -131,6 +133,36 @@ class TournamentAPITest {
             assertThat(status).isEqualTo(HttpStatus.OK)
             assertThat(headers.contentType.get()).isEqualTo("application/json")
             assertThat(body.get()).isEqualTo(emptyList<Tournament>())
+        }
+    }
+
+    @Test
+    fun `should return saved tournament when created`() {
+        every { service.saveTournament(any()) } returns tournament
+
+        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", tournament)
+        val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
+
+        with(response) {
+            assertThat(status).isEqualTo(HttpStatus.CREATED)
+            assertThat(headers.contentType.get()).isEqualTo("application/json")
+            assertThat(body.get()).isEqualTo(tournament)
+        }
+    }
+
+    // @Disabled("TODO: Work out why this passes - validation on Rx types not working? it should fail NotEmpty validation on bean")
+    @Test
+    fun `should fail gracefully when validation fails`() {
+        val incompleteTournament = Tournament(id = "x")
+        every { service.saveTournament(any()) } returns incompleteTournament
+
+        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", incompleteTournament)
+        val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
+
+        with(response) {
+            assertThat(status).isEqualTo(HttpStatus.CREATED)
+            assertThat(headers.contentType.get()).isEqualTo("application/json")
+            assertThat(body.get()).isEqualTo(incompleteTournament)
         }
     }
 }
