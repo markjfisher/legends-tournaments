@@ -3,17 +3,12 @@ package tournament.api.repository
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import javax.validation.constraints.NotEmpty
+import java.time.Instant
 
 data class Tournament(
-    val id: String,
-
-    @NotEmpty(message = "A tournament must have a name")
+    val id: String = "",
     val name: String = "",
-
-    @NotEmpty(message = "A tournament must have a date")
-    val date: String = "",
-
+    val date: Instant = Instant.EPOCH,
     val rules: List<String> = emptyList()
 
 ) {
@@ -22,4 +17,8 @@ data class Tournament(
         .apply { setSerializationInclusion(JsonInclude.Include.NON_NULL) }
 
     fun asJson(): String = mapper.writeValueAsString(this)
+
+    fun withId(uuid: String): Tournament {
+        return Tournament(id = uuid, name = name, date = date, rules = rules)
+    }
 }

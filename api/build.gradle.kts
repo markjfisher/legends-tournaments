@@ -30,6 +30,7 @@ val logbackEncoderVersion: String by project
 val okHttpVerison: String by project
 val googleCloudDatastoreVersion: String by project
 val googleOAuthHTTPVersion: String by project
+val uuidGeneratorVersion: String by project
 
 val easyRulesCoreVersion: String by project
 val elderscrollsLegendsSdkJavaVersion: String by project
@@ -43,6 +44,7 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-management")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
+    implementation("com.fasterxml.uuid:java-uuid-generator:$uuidGeneratorVersion")
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.micronaut.configuration:micronaut-hibernate-validator")
     implementation("io.micronaut:micronaut-security")

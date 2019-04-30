@@ -1,11 +1,17 @@
 package tournament.api.repository
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.uuid.Generators
+import com.google.cloud.Timestamp
 import com.google.cloud.datastore.*
+import io.micronaut.http.HttpStatus
 import mu.KotlinLogging
-import tournament.api.repository.TournamentEntityRepository.Companion.JSON_PROPERTY
+import tournament.api.repository.TournamentEntityRepository.Companion.TOURNAMENT_JSON_PROPERTY
+import java.time.Instant
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 
@@ -19,25 +25,33 @@ open class TournamentEntityRepository(
 
     companion object {
         const val TOURNAMENT_ID_PROPERTY: String = "id"
-        const val JSON_PROPERTY: String = "json"
+        const val TOURNAMENT_JSON_PROPERTY: String = "json"
+        const val TOURNAMENT_NAME_PROPERTY: String = "name"
+        const val TOURNAMENT_DATE_PROPERTY: String = "date"
         const val TOURNAMENT_KIND = "Tournament"
     }
 
     fun getAllTournaments(): List<Tournament> {
-        return getTournaments("")
+        return getTournaments()
     }
 
     fun getTournamentById(id: String): Tournament? {
-        return getTournaments(id).firstOrNull()
+        return getTournaments(id, this::matchOnTournamentId).firstOrNull()
     }
 
-    private fun getTournaments(id: String): List<Tournament> {
-        logger.info { "getting tournament by id $id" }
+    fun getTournamentByName(name: String): Tournament? {
+        return getTournaments(name, this::matchOnTournamentName).firstOrNull()
+    }
+
+    private fun getTournaments(
+        queryValue: String = "",
+        matcher: (v: String) -> StructuredQuery.PropertyFilter? = { null }
+    ): List<Tournament> {
         var queryBuilder = Query.newEntityQueryBuilder()
             .setKind("Tournament")
 
-        if (id.isNotEmpty()) {
-            queryBuilder = queryBuilder.setFilter(matchOnTournamentId(id))
+        if (queryValue.isNotEmpty()) {
+            queryBuilder = queryBuilder.setFilter(matcher(queryValue))
         }
 
         val query = queryBuilder.build()
@@ -49,27 +63,28 @@ open class TournamentEntityRepository(
     }
 
     private fun matchOnTournamentId(id: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_ID_PROPERTY, id)
+    private fun matchOnTournamentName(name: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_NAME_PROPERTY, name)
 
-    open fun saveTournament(tournament: Tournament): Tournament {
+    open fun saveTournament(tournament: Tournament): Pair<SaveStatus, Tournament> {
+        val tournamentByName = getTournamentByName(tournament.name)
+        if (tournamentByName != null) {
+            return Pair(
+                SaveStatus(
+                    message = "Found existing tournament with name ${tournament.name}",
+                    httpStatus = HttpStatus.CONFLICT
+                ),
+                tournament
+            )
+        }
+
         var transaction: Transaction? = null
         try {
+            val tournamentWithUUID = tournament.withId(createId())
+
             transaction = datastore.newTransaction()
-
-            val listValueBuilder = ListValue.newBuilder()
-            tournament.rules.forEach { listValueBuilder.addValue(it) }
-            val rules = listValueBuilder.build()
-
-            val tournamentEntity = Entity
-                .newBuilder(getKey(tournament.id, TOURNAMENT_KIND))
-                .set(JSON_PROPERTY, StringValue.newBuilder(tournament.asJson())
-                    .setExcludeFromIndexes(true)
-                    .build())
-                .set(TOURNAMENT_ID_PROPERTY, tournament.id)
-                .build()
-
-            transaction.put(tournamentEntity)
-
+            transaction.put(createEntity(tournamentWithUUID))
             transaction.commit()
+            return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournamentWithUUID)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -77,14 +92,65 @@ open class TournamentEntityRepository(
                 transaction.rollback()
             }
         }
-        return tournament
+    }
+
+    open fun updateTournament(tournament: Tournament): Tournament? {
+        val tournamentById = getTournamentById(tournament.id)
+        if (tournamentById == null) {
+            // TODO: didn't find the resource HANDLE IT!
+            logger.error { "Didn't find tournament for $tournament" }
+            return null
+        }
+
+        var transaction: Transaction? = null
+        try {
+            transaction = datastore.newTransaction()
+            transaction.put(createEntity(tournament))
+            transaction.commit()
+            return tournament
+        } catch (e: Exception) {
+            throw RepositoryException(cause = e)
+        } finally {
+            if (transaction != null && transaction.isActive) {
+                transaction.rollback()
+            }
+        }
+    }
+
+    private fun createEntity(tournament: Tournament): Entity {
+        return Entity
+            .newBuilder(getKey(tournament.id, TOURNAMENT_KIND))
+            .set(TOURNAMENT_ID_PROPERTY, tournament.id)
+            .set(TOURNAMENT_NAME_PROPERTY, tournament.name)
+            .set(TOURNAMENT_DATE_PROPERTY, Timestamp.of(Date.from(tournament.date)))
+            .set(
+                TOURNAMENT_JSON_PROPERTY, StringValue.newBuilder(tournament.asJson())
+                    .setExcludeFromIndexes(true)
+                    .build()
+            )
+            .build()
     }
 
     private fun getKey(id: String, kind: String): Key {
         return keyFactories.getOrPut(kind) { datastore.newKeyFactory().setKind(kind) }.newKey(id)
     }
 
+    private fun createId() = Generators.randomBasedGenerator().generate().toString()
+
+    fun getTournamentDate(entity: Entity): Instant {
+        val datastoreTimestamp = entity.getValue<TimestampValue>(TOURNAMENT_DATE_PROPERTY).get()
+        return datastoreTimestamp.toDate().toInstant()
+    }
+
 }
 
-private val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-fun Entity.convertToTournament() = mapper.readValue<Tournament>(getString(JSON_PROPERTY))
+data class SaveStatus(
+    val message: String,
+    val httpStatus: HttpStatus
+)
+
+private val mapper = jacksonObjectMapper()
+    .registerModule(JavaTimeModule())
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
+fun Entity.convertToTournament() = mapper.readValue<Tournament>(getString(TOURNAMENT_JSON_PROPERTY))

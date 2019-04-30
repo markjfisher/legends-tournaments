@@ -1,6 +1,8 @@
 package tournament.api.controller
 
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.MutableHttpResponse
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -31,16 +33,23 @@ class TournamentController(private val service: TournamentService) {
 
 
     @Post("/create")
-    fun saveTournament(@Body @Valid tournament: Single<Tournament>): Single<HttpResponse<Tournament>> {
-        return tournament.map { t ->
-            try {
-                val saved = service.saveTournament(t)
-                HttpResponse.created(saved)
-            } catch (e: Exception) {
-                HttpResponse.serverError(t)
+    fun saveTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<Tournament>> {
+        return tournament
+            .map { t ->
+                val (status, saved) = service.saveTournament(t)
+                when {
+                    status.httpStatus == HttpStatus.OK -> HttpResponse.created(saved)
+                    status.httpStatus == HttpStatus.CONFLICT -> HttpResponse.status<Tournament>(status.httpStatus, status.message)
+                    else -> HttpResponse.badRequest(t)
+                }
             }
-        }
+            .onErrorResumeNext { t: Throwable ->
+                Single.error(ApiException("Could not save tournament", t))
+            }
     }
 
+}
 
+class ApiException(message: String? = null, cause: Throwable) : Exception(message, cause) {
+    constructor(cause: Throwable) : this(null, cause)
 }

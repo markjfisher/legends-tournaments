@@ -21,3 +21,5 @@ As a user I would like to sign up to a tournament
 As a user I would like to view decks I have played in each tournament I attended
 
 As an admin I would like to view participants in a tournament
+
+☑️

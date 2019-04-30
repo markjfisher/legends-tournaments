@@ -3,7 +3,6 @@ package tournament.api.controller
 import io.micronaut.core.type.Argument
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.MutableHttpRequest
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.http.client.exceptions.HttpClientResponseException
@@ -13,12 +12,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import tournament.api.repository.Tournament
 import tournament.api.service.DefaultTournamentService
 import tournament.api.service.TournamentService
+import tournament.api.repository.SaveStatus
+import java.time.Instant
 import javax.inject.Inject
 
 @MicronautTest
@@ -39,7 +39,7 @@ class TournamentAPITest {
         Tournament(
             id = "1",
             name = "Test Tournament",
-            date = "2019-30-04 00:00:00.0000Z",
+            date = Instant.parse("2019-04-30T00:00:00.0000Z"),
             rules = listOf("rule 1", "rule 2")
         )
 
@@ -53,7 +53,7 @@ class TournamentAPITest {
 
         // Then
         assertThat(response).isEqualToIgnoringWhitespace("""
-            { "id": "1", "name": "Test Tournament", "date": "2019-30-04 00:00:00.0000Z", "rules": ["rule 1", "rule 2"] }
+            {"id":"1","name":"Test Tournament","date":1556582400.000000000,"rules":["rule 1","rule 2"]}
         """.trimIndent())
     }
 
@@ -100,7 +100,7 @@ class TournamentAPITest {
 
         // Then
         assertThat(response).isEqualToIgnoringWhitespace("""
-            [{ "id": "1", "name": "Test Tournament", "date": "2019-30-04 00:00:00.0000Z", "rules": ["rule 1", "rule 2"] }]
+            [{"id":"1","name":"Test Tournament","date":1556582400.000000000,"rules":["rule 1","rule 2"]}]
         """.trimIndent())
     }
 
@@ -138,7 +138,7 @@ class TournamentAPITest {
 
     @Test
     fun `should return saved tournament when created`() {
-        every { service.saveTournament(any()) } returns tournament
+        every { service.saveTournament(any()) } returns createPair(tournament)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", tournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
@@ -154,7 +154,7 @@ class TournamentAPITest {
     @Test
     fun `should fail gracefully when validation fails`() {
         val incompleteTournament = Tournament(id = "x")
-        every { service.saveTournament(any()) } returns incompleteTournament
+        every { service.saveTournament(any()) } returns createPair(incompleteTournament)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", incompleteTournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
@@ -164,5 +164,9 @@ class TournamentAPITest {
             assertThat(headers.contentType.get()).isEqualTo("application/json")
             assertThat(body.get()).isEqualTo(incompleteTournament)
         }
+    }
+
+    private fun createPair(tournament: Tournament): Pair<SaveStatus, Tournament> {
+        return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournament)
     }
 }
