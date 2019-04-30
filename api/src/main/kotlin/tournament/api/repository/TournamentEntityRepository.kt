@@ -26,8 +26,8 @@ open class TournamentEntityRepository(
         return getTournaments("")
     }
 
-    fun getTournamentById(id: String): Tournament {
-        return getTournaments(id).first()
+    fun getTournamentById(id: String): Tournament? {
+        return getTournaments(id).firstOrNull()
     }
 
     private fun getTournaments(id: String): List<Tournament> {
