@@ -14,9 +14,9 @@ K8S_CLUSTER_REGION=${K8S_CLUSTER_REGION:-us-central1-a}
 
 COMMIT_SHORT_SHA=$(git rev-parse --short HEAD)
 
-GOOGLE_IMAGE_TAG="gcr.io/lt-container-images/testing.legends-tournaments"
+GOOGLE_IMAGE_TAG="gcr.io/legends-tournaments/testing.legends-tournaments"
 DOCKER_IMAGE_TAG="${GOOGLE_IMAGE_TAG}:${COMMIT_SHORT_SHA}"
-DOCKER_IMAGE_LATEST="gcr.io/lt-container-images/testing.legends-tournaments:latest"
+DOCKER_IMAGE_LATEST="${GOOGLE_IMAGE_TAG}:latest"
 
 gcloud auth login
 sh scripts/authenticate-to-gke.sh ${K8S_CLUSTER_NAME} ${K8S_CLUSTER_REGION}

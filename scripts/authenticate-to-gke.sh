@@ -18,7 +18,6 @@ authenticate() {
    gcloud config set compute/zone ${zone}
    gcloud container clusters get-credentials ${cluster} --zone ${zone} --project ${project}
    kubectl config set-context $(kubectl config current-context)
-      # --namespace=catalogue
 
 }
 

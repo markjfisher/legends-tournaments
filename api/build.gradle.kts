@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.allopen")
     id("com.github.johnrengelman.shadow")
     id("io.spring.dependency-management")
+    id("com.google.cloud.tools.jib")
 }
 
 val micronautBoMVersion: String by project
@@ -116,4 +117,20 @@ application {
 
 allOpen {
     annotation("io.micronaut.aop.Around")
+}
+
+jib {
+    to {
+        image = "gcr.io/legends-tournaments/testing.legends-tournaments"
+    }
+
+    from {
+        image = "gcr.io/distroless/java:11-debug"
+    }
+
+    container {
+        environment = mapOf("GOOGLE_APPLICATION_CREDENTIALS" to "/secrets/service_key.json")
+    }
+
+
 }
