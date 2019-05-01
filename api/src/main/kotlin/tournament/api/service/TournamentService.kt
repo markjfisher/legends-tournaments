@@ -1,5 +1,6 @@
 package tournament.api.service
 
+import io.micronaut.http.HttpStatus
 import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentEntityRepository
@@ -9,7 +10,7 @@ interface TournamentService {
     fun getTournamentById(id: String): Tournament?
     fun getTournaments(): List<Tournament>
     fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament>
-    fun deleteTournament(id: String): Pair<ReturnStatus, String>
+    fun deleteTournament(id: String): HttpStatus
 }
 
 @Singleton
@@ -26,7 +27,7 @@ class DefaultTournamentService(private val repository: TournamentEntityRepositor
         return repository.saveTournament(tournament)
     }
 
-    override fun deleteTournament(id: String): Pair<ReturnStatus, String> {
+    override fun deleteTournament(id: String): HttpStatus {
         return repository.deleteTournament(id)
     }
 }

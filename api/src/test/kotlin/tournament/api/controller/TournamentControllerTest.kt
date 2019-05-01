@@ -116,7 +116,7 @@ class TournamentControllerTest {
     fun `sucessfully deleting a tournament`() {
         val id = "1"
         val service = mockk<TournamentService>(relaxed = false)
-        every { service.deleteTournament(id) } returns createPair(item = id, httpStatus = HttpStatus.ACCEPTED)
+        every { service.deleteTournament(id) } returns HttpStatus.ACCEPTED
 
         // When
         val response = TournamentController(service).deleteTournament(Single.just(id)).blockingGet()
@@ -132,7 +132,7 @@ class TournamentControllerTest {
     fun `could not find tournament to delete`() {
         val id = "1"
         val service = mockk<TournamentService>(relaxed = false)
-        every { service.deleteTournament(id) } returns createPair(item = id, httpStatus = HttpStatus.NOT_FOUND)
+        every { service.deleteTournament(id) } returns HttpStatus.NOT_FOUND
 
         // When
         val response = TournamentController(service).deleteTournament(Single.just(id)).blockingGet()

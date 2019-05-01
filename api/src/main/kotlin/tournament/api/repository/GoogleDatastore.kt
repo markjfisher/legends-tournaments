@@ -38,5 +38,5 @@ class KeyFactoryConfig(private val datastore: Datastore) {
     @Singleton
     @Bean
     @Named("Tournament")
-    fun createTournamentKeyFactory() : KeyFactory = datastore.newKeyFactory().setKind("Tournament")
+    fun createTournamentKeyFactory() : KeyFactory = datastore.newKeyFactory().setKind(TournamentEntityRepository.TOURNAMENT_KIND)
 }

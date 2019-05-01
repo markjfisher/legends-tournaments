@@ -117,9 +117,24 @@ open class TournamentEntityRepository(
         }
     }
 
-    open fun deleteTournament(id: String): Pair<ReturnStatus, String> {
-        // TODO: Implement
-        return Pair(ReturnStatus(message = "deleted", httpStatus = HttpStatus.ACCEPTED), id)
+    open fun deleteTournament(id: String): HttpStatus {
+        if (getTournamentById(id) == null) {
+            return HttpStatus.NOT_FOUND
+        }
+
+        var transaction: Transaction? = null
+        try {
+            transaction = datastore.newTransaction()
+            transaction.delete(getKey(id, TOURNAMENT_KIND))
+            transaction.commit()
+            return HttpStatus.ACCEPTED
+        } catch (e: Exception) {
+            throw RepositoryException(cause = e)
+        } finally {
+            if (transaction != null && transaction.isActive) {
+                transaction.rollback()
+            }
+        }
     }
 
 

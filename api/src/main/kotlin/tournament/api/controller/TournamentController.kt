@@ -48,20 +48,14 @@ class TournamentController(private val service: TournamentService) {
     fun deleteTournament(id: Single<String>): Single<MutableHttpResponse<String>> {
         return id
             .map { v ->
-                val (status, _) = service.deleteTournament(v)
-                when {
-                    status.httpStatus == HttpStatus.ACCEPTED -> HttpResponse.accepted()
-                    status.httpStatus == HttpStatus.NOT_FOUND -> HttpResponse.notFound()
-                    else -> HttpResponse.badRequest<String>("Could not delete tournament: ${status.message}")
+                when (service.deleteTournament(v)) {
+                    HttpStatus.ACCEPTED -> HttpResponse.accepted()
+                    HttpStatus.NOT_FOUND -> HttpResponse.notFound()
+                    else -> HttpResponse.badRequest<String>("Could not delete tournament.")
                 }
             }
             .onErrorResumeNext { t: Throwable ->
-                // Single.error(ApiException("Could not delete tournament", t))
                 Single.just(HttpResponse.serverError("Could not delete tournament: ${t.message}"))
             }
     }
-}
-
-class ApiException(message: String? = null, cause: Throwable) : Exception(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
 }
