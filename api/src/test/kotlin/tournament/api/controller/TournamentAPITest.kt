@@ -96,7 +96,7 @@ class TournamentAPITest {
         every { service.getTournaments() } returns listOf(tournament)
 
         // When
-        val response = client.toBlocking().retrieve("/tournament/list")
+        val response = client.toBlocking().retrieve("/tournament/")
 
         // Then
         assertThat(response).isEqualToIgnoringWhitespace("""
@@ -109,7 +109,7 @@ class TournamentAPITest {
         // Given
         every { service.getTournaments()} returns listOf(tournament)
 
-        val request: HttpRequest<String> = HttpRequest.GET("/tournament/list")
+        val request: HttpRequest<String> = HttpRequest.GET("/tournament/")
         val response = client.toBlocking().exchange(request, Argument.of(List::class.java, Tournament::class.java))
 
         // Then
@@ -125,7 +125,7 @@ class TournamentAPITest {
         // Given
         every { service.getTournaments()} returns emptyList()
 
-        val request: HttpRequest<String> = HttpRequest.GET("/tournament/list")
+        val request: HttpRequest<String> = HttpRequest.GET("/tournament/")
         val response = client.toBlocking().exchange(request, Argument.of(List::class.java, Tournament::class.java))
 
         // Then
@@ -140,7 +140,7 @@ class TournamentAPITest {
     fun `should return saved tournament when created`() {
         every { service.saveTournament(any()) } returns createPair(tournament)
 
-        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", tournament)
+        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", tournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
 
         with(response) {
@@ -156,7 +156,7 @@ class TournamentAPITest {
         val incompleteTournament = Tournament(id = "x")
         every { service.saveTournament(any()) } returns createPair(incompleteTournament)
 
-        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/create", incompleteTournament)
+        val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", incompleteTournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
 
         with(response) {

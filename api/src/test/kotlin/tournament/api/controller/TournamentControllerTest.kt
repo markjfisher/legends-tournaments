@@ -1,7 +1,6 @@
 package tournament.api.controller
 
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.http.netty.NettyMutableHttpResponse
 import io.mockk.every
 import io.mockk.mockk
@@ -14,7 +13,6 @@ import tournament.api.repository.SaveStatus
 import tournament.api.repository.Tournament
 import tournament.api.service.TournamentService
 import java.io.IOException
-import java.lang.Exception
 import java.lang.RuntimeException
 import java.time.Instant
 
@@ -35,7 +33,7 @@ class TournamentControllerTest {
         every { service.getTournaments() } returns listOf(Tournament(id = "1", name = "test 1"))
 
         // When
-        val tournaments = TournamentController(service).getTournaments().blockingGet()
+        val tournaments = TournamentController(service).listTournaments().blockingGet()
 
         // Then
         assertThat(tournaments).isNotEmpty
@@ -75,7 +73,7 @@ class TournamentControllerTest {
         every { service.saveTournament(any()) } returns createPair(responseTournament)
 
         // When
-        val response = TournamentController(service).saveTournament(Single.just(tournament)).blockingGet()
+        val response = TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
 
         // then
         verify(exactly = 1) { service.saveTournament(any()) }
@@ -91,7 +89,7 @@ class TournamentControllerTest {
             tournament
         )
 
-        val response = TournamentController(service).saveTournament(Single.just(tournament)).blockingGet()
+        val response = TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
 
         verify(exactly = 1) { service.saveTournament(any()) }
         assertThat(response.status).isEqualTo(HttpStatus.CONFLICT)
@@ -107,7 +105,7 @@ class TournamentControllerTest {
 
         // val response = TournamentController(service).saveTournament(Single.just(tournament)).blockingGet()
         val exception = assertThrows<RuntimeException> {
-            TournamentController(service).saveTournament(Single.just(tournament)).blockingGet()
+            TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
         }
 
         assertThat(exception.cause?.message).isEqualTo("Could not save tournament")

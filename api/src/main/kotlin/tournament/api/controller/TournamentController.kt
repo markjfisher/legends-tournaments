@@ -20,8 +20,8 @@ import javax.validation.Valid
 @Controller("/tournament")
 class TournamentController(private val service: TournamentService) {
 
-    @Get("/list")
-    fun getTournaments(): Single<List<Tournament>> {
+    @Get("/")
+    fun listTournaments(): Single<List<Tournament>> {
         return Single.just(service.getTournaments())
     }
 
@@ -32,8 +32,8 @@ class TournamentController(private val service: TournamentService) {
     }
 
 
-    @Post("/create")
-    fun saveTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<Tournament>> {
+    @Post("/")
+    fun createTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<Tournament>> {
         return tournament
             .map { t ->
                 val (status, saved) = service.saveTournament(t)
