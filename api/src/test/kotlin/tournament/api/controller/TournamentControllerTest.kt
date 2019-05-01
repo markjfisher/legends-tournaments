@@ -9,7 +9,7 @@ import io.reactivex.Single
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import tournament.api.repository.SaveStatus
+import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
 import tournament.api.service.TournamentService
 import java.io.IOException
@@ -78,14 +78,14 @@ class TournamentControllerTest {
         // then
         verify(exactly = 1) { service.saveTournament(any()) }
         assertThat(response.status).isEqualTo(HttpStatus.CREATED)
-        assertThat(response.body()).isEqualTo(responseTournament)
+        assertThat(response.body()).isEqualTo(responseTournament.asJson())
     }
 
     @Test
     fun `should do something for Conflict`() {
         val service = mockk<TournamentService>(relaxed = false)
         every { service.saveTournament(any()) } returns Pair(
-            SaveStatus(message = "save error message", httpStatus = HttpStatus.CONFLICT),
+            ReturnStatus(message = "save error message", httpStatus = HttpStatus.CONFLICT),
             tournament
         )
 
@@ -93,28 +93,75 @@ class TournamentControllerTest {
 
         verify(exactly = 1) { service.saveTournament(any()) }
         assertThat(response.status).isEqualTo(HttpStatus.CONFLICT)
-        assertThat(response.body()).isEqualTo(null)
+        assertThat(response.body()).isNull()
         assertThat((response as NettyMutableHttpResponse).nativeResponse.status().reasonPhrase()).isEqualTo("save error message")
     }
 
     @Test
     fun `should return server error when service throws errors`() {
-        // TODO: This should be wrapped as a server error, not simply throw exception
         val service = mockk<TournamentService>(relaxed = false)
-        every { service.saveTournament(any()) } throws IOException("Test Error")
+        every { service.saveTournament(any()) } throws IOException("A test error")
 
-        // val response = TournamentController(service).saveTournament(Single.just(tournament)).blockingGet()
-        val exception = assertThrows<RuntimeException> {
-            TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
-        }
+        // When
+        val response = TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
 
-        assertThat(exception.cause?.message).isEqualTo("Could not save tournament")
-        assertThat(exception.cause).isInstanceOf(ApiException::class.java)
+        // Then
         verify(exactly = 1) { service.saveTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(response.body()).isEqualTo("Could not create tournament: A test error")
+
     }
 
-    private fun createPair(tournament: Tournament): Pair<SaveStatus, Tournament> {
-        return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournament)
+    @Test
+    fun `sucessfully deleting a tournament`() {
+        val id = "1"
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.deleteTournament(id) } returns createPair(item = id, httpStatus = HttpStatus.ACCEPTED)
+
+        // When
+        val response = TournamentController(service).deleteTournament(Single.just(id)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.deleteTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.ACCEPTED)
+        assertThat(response.body()).isNull()
+
+    }
+
+    @Test
+    fun `could not find tournament to delete`() {
+        val id = "1"
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.deleteTournament(id) } returns createPair(item = id, httpStatus = HttpStatus.NOT_FOUND)
+
+        // When
+        val response = TournamentController(service).deleteTournament(Single.just(id)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.deleteTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.NOT_FOUND)
+        assertThat(response.body()).isNull()
+
+    }
+
+    @Test
+    fun `delete causes error in service`() {
+        val id = "1"
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.deleteTournament(id) } throws IOException("A test error")
+
+        // When
+        val response = TournamentController(service).deleteTournament(Single.just(id)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.deleteTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(response.body()).isEqualTo("Could not delete tournament: A test error")
+
+    }
+
+    private fun <T> createPair(item: T, httpStatus: HttpStatus = HttpStatus.OK, message: String = ""): Pair<ReturnStatus, T> {
+        return Pair(ReturnStatus(message = message, httpStatus = httpStatus), item)
     }
 
 }

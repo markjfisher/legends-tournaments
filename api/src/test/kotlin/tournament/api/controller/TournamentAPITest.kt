@@ -17,7 +17,7 @@ import org.junit.jupiter.api.assertThrows
 import tournament.api.repository.Tournament
 import tournament.api.service.DefaultTournamentService
 import tournament.api.service.TournamentService
-import tournament.api.repository.SaveStatus
+import tournament.api.repository.ReturnStatus
 import java.time.Instant
 import javax.inject.Inject
 
@@ -166,7 +166,7 @@ class TournamentAPITest {
         }
     }
 
-    private fun createPair(tournament: Tournament): Pair<SaveStatus, Tournament> {
-        return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournament)
+    private fun createPair(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+        return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournament)
     }
 }

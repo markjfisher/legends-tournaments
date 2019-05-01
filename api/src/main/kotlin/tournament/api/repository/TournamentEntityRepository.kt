@@ -65,11 +65,11 @@ open class TournamentEntityRepository(
     private fun matchOnTournamentId(id: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_ID_PROPERTY, id)
     private fun matchOnTournamentName(name: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_NAME_PROPERTY, name)
 
-    open fun saveTournament(tournament: Tournament): Pair<SaveStatus, Tournament> {
+    open fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
         val tournamentByName = getTournamentByName(tournament.name)
         if (tournamentByName != null) {
             return Pair(
-                SaveStatus(
+                ReturnStatus(
                     message = "Found existing tournament with name ${tournament.name}",
                     httpStatus = HttpStatus.CONFLICT
                 ),
@@ -84,7 +84,7 @@ open class TournamentEntityRepository(
             transaction = datastore.newTransaction()
             transaction.put(createEntity(tournamentWithUUID))
             transaction.commit()
-            return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournamentWithUUID)
+            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournamentWithUUID)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -117,6 +117,12 @@ open class TournamentEntityRepository(
         }
     }
 
+    open fun deleteTournament(id: String): Pair<ReturnStatus, String> {
+        // TODO: Implement
+        return Pair(ReturnStatus(message = "deleted", httpStatus = HttpStatus.ACCEPTED), id)
+    }
+
+
     private fun createEntity(tournament: Tournament): Entity {
         return Entity
             .newBuilder(getKey(tournament.id, TOURNAMENT_KIND))
@@ -142,9 +148,10 @@ open class TournamentEntityRepository(
         return datastoreTimestamp.toDate().toInstant()
     }
 
+
 }
 
-data class SaveStatus(
+data class ReturnStatus(
     val message: String,
     val httpStatus: HttpStatus
 )

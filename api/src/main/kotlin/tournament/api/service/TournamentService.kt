@@ -1,6 +1,6 @@
 package tournament.api.service
 
-import tournament.api.repository.SaveStatus
+import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentEntityRepository
 import javax.inject.Singleton
@@ -8,7 +8,8 @@ import javax.inject.Singleton
 interface TournamentService {
     fun getTournamentById(id: String): Tournament?
     fun getTournaments(): List<Tournament>
-    fun saveTournament(tournament: Tournament): Pair<SaveStatus, Tournament>
+    fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament>
+    fun deleteTournament(id: String): Pair<ReturnStatus, String>
 }
 
 @Singleton
@@ -21,7 +22,11 @@ class DefaultTournamentService(private val repository: TournamentEntityRepositor
         return repository.getAllTournaments()
     }
 
-    override fun saveTournament(tournament: Tournament): Pair<SaveStatus, Tournament> {
+    override fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
         return repository.saveTournament(tournament)
+    }
+
+    override fun deleteTournament(id: String): Pair<ReturnStatus, String> {
+        return repository.deleteTournament(id)
     }
 }

@@ -23,3 +23,6 @@ As a user I would like to view decks I have played in each tournament I attended
 As an admin I would like to view participants in a tournament
 
 ☑️
+
+As a system I want to support all HTTP verbs for updating/deleting resources
+ala https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT

@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import tournament.api.repository.SaveStatus
+import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentEntityRepository
 
@@ -57,8 +57,8 @@ internal class TournamentServiceTest {
         assertThat(tournament).isEqualTo(testTournament)
     }
 
-    private fun createPair(tournament: Tournament): Pair<SaveStatus, Tournament> {
-        return Pair(SaveStatus(message = "", httpStatus = HttpStatus.OK), tournament)
+    private fun createPair(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+        return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournament)
     }
 
 }

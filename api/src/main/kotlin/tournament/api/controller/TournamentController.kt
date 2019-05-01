@@ -3,10 +3,7 @@ package tournament.api.controller
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.MutableHttpResponse
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.*
 import io.micronaut.validation.Validated
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -31,23 +28,38 @@ class TournamentController(private val service: TournamentService) {
         return if (tournament != null) Maybe.just(tournament) else Maybe.empty()
     }
 
-
     @Post("/")
-    fun createTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<Tournament>> {
+    fun createTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<String>> {
         return tournament
             .map { t ->
                 val (status, saved) = service.saveTournament(t)
                 when {
-                    status.httpStatus == HttpStatus.OK -> HttpResponse.created(saved)
-                    status.httpStatus == HttpStatus.CONFLICT -> HttpResponse.status<Tournament>(status.httpStatus, status.message)
-                    else -> HttpResponse.badRequest(t)
+                    status.httpStatus == HttpStatus.OK -> HttpResponse.created(saved.asJson())
+                    status.httpStatus == HttpStatus.CONFLICT -> HttpResponse.status(status.httpStatus, status.message)
+                    else -> HttpResponse.badRequest("Could not create tournament: ${status.message}")
                 }
             }
             .onErrorResumeNext { t: Throwable ->
-                Single.error(ApiException("Could not save tournament", t))
+                Single.just(HttpResponse.serverError("Could not create tournament: ${t.message}"))
             }
     }
 
+    @Delete("/{id}")
+    fun deleteTournament(id: Single<String>): Single<MutableHttpResponse<String>> {
+        return id
+            .map { v ->
+                val (status, _) = service.deleteTournament(v)
+                when {
+                    status.httpStatus == HttpStatus.ACCEPTED -> HttpResponse.accepted()
+                    status.httpStatus == HttpStatus.NOT_FOUND -> HttpResponse.notFound()
+                    else -> HttpResponse.badRequest<String>("Could not delete tournament: ${status.message}")
+                }
+            }
+            .onErrorResumeNext { t: Throwable ->
+                // Single.error(ApiException("Could not delete tournament", t))
+                Single.just(HttpResponse.serverError("Could not delete tournament: ${t.message}"))
+            }
+    }
 }
 
 class ApiException(message: String? = null, cause: Throwable) : Exception(message, cause) {
