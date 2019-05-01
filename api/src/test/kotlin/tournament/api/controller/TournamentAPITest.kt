@@ -14,10 +14,10 @@ import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tournament.api.createPair
 import tournament.api.repository.Tournament
 import tournament.api.service.DefaultTournamentService
 import tournament.api.service.TournamentService
-import tournament.api.repository.ReturnStatus
 import java.time.Instant
 import javax.inject.Inject
 
@@ -138,7 +138,7 @@ class TournamentAPITest {
 
     @Test
     fun `should return saved tournament when created`() {
-        every { service.saveTournament(any()) } returns createPair(tournament)
+        every { service.saveTournament(any()) } returns createPair(item = tournament, httpStatus = HttpStatus.CREATED)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", tournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
@@ -150,11 +150,13 @@ class TournamentAPITest {
         }
     }
 
+    // TODO: Delete, Put
+
     // @Disabled("TODO: Work out why this passes - validation on Rx types not working? it should fail NotEmpty validation on bean")
     @Test
     fun `should fail gracefully when validation fails`() {
         val incompleteTournament = Tournament(id = "x")
-        every { service.saveTournament(any()) } returns createPair(incompleteTournament)
+        every { service.saveTournament(any()) } returns createPair(item = incompleteTournament, httpStatus = HttpStatus.CREATED)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", incompleteTournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
@@ -166,7 +168,4 @@ class TournamentAPITest {
         }
     }
 
-    private fun createPair(tournament: Tournament): Pair<ReturnStatus, Tournament> {
-        return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournament)
-    }
 }

@@ -11,6 +11,7 @@ interface TournamentService {
     fun getTournaments(): List<Tournament>
     fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament>
     fun deleteTournament(id: String): HttpStatus
+    fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament>
 }
 
 @Singleton
@@ -29,5 +30,9 @@ class DefaultTournamentService(private val repository: TournamentEntityRepositor
 
     override fun deleteTournament(id: String): HttpStatus {
         return repository.deleteTournament(id)
+    }
+
+    override fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+        return repository.updateTournament(tournament)
     }
 }

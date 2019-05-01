@@ -8,12 +8,11 @@ import io.mockk.verify
 import io.reactivex.Single
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import tournament.api.createPair
 import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
 import tournament.api.service.TournamentService
 import java.io.IOException
-import java.lang.RuntimeException
 import java.time.Instant
 
 class TournamentControllerTest {
@@ -70,7 +69,7 @@ class TournamentControllerTest {
     fun `should save and return tournament when posted to controller`() {
         val responseTournament = Tournament(id = "2", name = "Test Tournament Response")
         val service = mockk<TournamentService>(relaxed = false)
-        every { service.saveTournament(any()) } returns createPair(responseTournament)
+        every { service.saveTournament(any()) } returns createPair(item = responseTournament, httpStatus = HttpStatus.CREATED)
 
         // When
         val response = TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
@@ -84,10 +83,7 @@ class TournamentControllerTest {
     @Test
     fun `should do something for Conflict`() {
         val service = mockk<TournamentService>(relaxed = false)
-        every { service.saveTournament(any()) } returns Pair(
-            ReturnStatus(message = "save error message", httpStatus = HttpStatus.CONFLICT),
-            tournament
-        )
+        every { service.saveTournament(any()) } returns createPair(item = tournament, httpStatus = HttpStatus.CONFLICT, message = "save error message")
 
         val response = TournamentController(service).createTournament(Single.just(tournament)).blockingGet()
 
@@ -160,8 +156,74 @@ class TournamentControllerTest {
 
     }
 
-    private fun <T> createPair(item: T, httpStatus: HttpStatus = HttpStatus.OK, message: String = ""): Pair<ReturnStatus, T> {
-        return Pair(ReturnStatus(message = message, httpStatus = httpStatus), item)
+    @Test
+    fun `sucessfully updating a tournament`() {
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.updateTournament(any()) } returns Pair(
+            ReturnStatus(message = "", httpStatus = HttpStatus.NO_CONTENT),
+            tournament
+        )
+
+        // When
+        val response = TournamentController(service).updateOrCreateTournament(Single.just(tournament)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.updateTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT)
+        assertThat(response.body()).isNull()
+
+    }
+
+
+    @Test
+    fun `sucessfully putting a new tournament is same as saving`() {
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.updateTournament(any()) } returns Pair(
+            ReturnStatus(message = "", httpStatus = HttpStatus.CREATED),
+            tournament
+        )
+
+        // When
+        val response = TournamentController(service).updateOrCreateTournament(Single.just(tournament)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.updateTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.CREATED)
+        assertThat(response.body()).isEqualTo(tournament.asJson())
+
+    }
+
+    @Test
+    fun `putting a duplicate named tournament is a conflict`() {
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.updateTournament(any()) } returns Pair(
+            ReturnStatus(message = "", httpStatus = HttpStatus.CONFLICT),
+            tournament
+        )
+
+        // When
+        val response = TournamentController(service).updateOrCreateTournament(Single.just(tournament)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.updateTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(response.body()).isEqualTo("Duplicate tournament name found with different id")
+
+    }
+
+    @Test
+    fun `update causes error in service`() {
+        val service = mockk<TournamentService>(relaxed = false)
+        every { service.updateTournament(any()) } throws IOException("A test error")
+
+        // When
+        val response = TournamentController(service).updateOrCreateTournament(Single.just(tournament)).blockingGet()
+
+        // Then
+        verify(exactly = 1) { service.updateTournament(any()) }
+        assertThat(response.status).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(response.body()).isEqualTo("Could not update tournament: A test error")
+
     }
 
 }

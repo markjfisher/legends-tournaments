@@ -84,7 +84,7 @@ open class TournamentEntityRepository(
             transaction = datastore.newTransaction()
             transaction.put(createEntity(tournamentWithUUID))
             transaction.commit()
-            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournamentWithUUID)
+            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.CREATED), tournamentWithUUID)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -94,20 +94,18 @@ open class TournamentEntityRepository(
         }
     }
 
-    open fun updateTournament(tournament: Tournament): Tournament? {
-        val tournamentById = getTournamentById(tournament.id)
-        if (tournamentById == null) {
-            // TODO: didn't find the resource HANDLE IT!
-            logger.error { "Didn't find tournament for $tournament" }
-            return null
-        }
+    open fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+        getTournamentById(tournament.id) ?: return saveTournament(tournament)
 
+        // update it
         var transaction: Transaction? = null
         try {
             transaction = datastore.newTransaction()
             transaction.put(createEntity(tournament))
             transaction.commit()
-            return tournament
+
+            // PUT returns either OK or NO_CONTENT
+            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.NO_CONTENT), tournament)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {

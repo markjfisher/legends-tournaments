@@ -22,6 +22,8 @@ class TournamentController(private val service: TournamentService) {
         return Single.just(service.getTournaments())
     }
 
+
+    // TODO: convert to Single<String> on input
     @Get("/{id}")
     fun getTournament(id: String): Maybe<Tournament> {
         val tournament = service.getTournamentById(id)
@@ -34,7 +36,7 @@ class TournamentController(private val service: TournamentService) {
             .map { t ->
                 val (status, saved) = service.saveTournament(t)
                 when {
-                    status.httpStatus == HttpStatus.OK -> HttpResponse.created(saved.asJson())
+                    status.httpStatus == HttpStatus.CREATED -> HttpResponse.created(saved.asJson())
                     status.httpStatus == HttpStatus.CONFLICT -> HttpResponse.status(status.httpStatus, status.message)
                     else -> HttpResponse.badRequest("Could not create tournament: ${status.message}")
                 }
@@ -57,5 +59,23 @@ class TournamentController(private val service: TournamentService) {
             .onErrorResumeNext { t: Throwable ->
                 Single.just(HttpResponse.serverError("Could not delete tournament: ${t.message}"))
             }
+    }
+
+    @Put("/")
+    fun updateOrCreateTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<String>> {
+        return tournament
+            .map { t ->
+                val (status, updated) = service.updateTournament(t)
+                when (status.httpStatus) {
+                    HttpStatus.NO_CONTENT -> HttpResponse.noContent()
+                    HttpStatus.CREATED -> HttpResponse.created(updated.asJson()) // it was saved instead of updated, return the body of the item
+                    HttpStatus.CONFLICT -> HttpResponse.badRequest("Duplicate tournament name found with different id")
+                    else -> HttpResponse.badRequest<String>()
+                }
+            }
+            .onErrorResumeNext { t: Throwable ->
+                Single.just(HttpResponse.serverError("Could not update tournament: ${t.message}"))
+            }
+
     }
 }
