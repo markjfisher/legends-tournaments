@@ -3,9 +3,6 @@ package network
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.serializersModuleOf
-import kotlinx.serialization.parse
-import kotlinx.serialization.stringify
 import org.w3c.xhr.XMLHttpRequest
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -67,12 +64,11 @@ suspend inline fun <reified S : Any, reified R : Any> uploadBase(
     url: String,
     httpVerb: HTTPVerbs,
     data: S,
-    dataClazz: KClass<S>,
     dataSerializer: KSerializer<S>,
-    responseClazz: KClass<R>,
     responseSerializer: KSerializer<R>,
-    debug: Boolean = true
+    debug: Boolean = false
 ): R {
+    if (debug) console.log("uploadBase for url: $url, verb: $httpVerb, dataSerializer.descriptor: ${dataSerializer.descriptor.name}, responseSerializer.descriptor: ${responseSerializer.descriptor.name}, data: $data")
     val jsonString = Json.nonstrict.stringify(dataSerializer, data)
     val response = httpPutOrPost(url, jsonString, httpVerb)
     return Json.nonstrict.parse(responseSerializer, response)
@@ -85,13 +81,18 @@ suspend inline fun <reified S : Any, reified R : Any> uploadBase(
 suspend inline fun <reified S : Any, reified R : Any> putBase(
     url: String,
     data: S,
-    dataClazz: KClass<S>,
     dataSerializer: KSerializer<S>,
-    responseClazz: KClass<R>,
     responseSerializer: KSerializer<R>,
     debug: Boolean = false
 ): R {
-    return uploadBase(url, HTTPVerbs.PUT, data, dataClazz, dataSerializer, responseClazz, responseSerializer)
+    return uploadBase(
+        url,
+        HTTPVerbs.PUT,
+        data,
+        dataSerializer,
+        responseSerializer,
+        debug
+    )
 }
 
 /**
@@ -101,23 +102,19 @@ suspend inline fun <reified S : Any, reified R : Any> putBase(
 suspend inline fun <reified S : Any, reified R : Any> postBase(
     url: String,
     data: S,
-    dataClazz: KClass<S>,
     dataSerializer: KSerializer<S>,
-    responseClazz: KClass<R>,
     responseSerializer: KSerializer<R>,
-    debug: Boolean = true
+    debug: Boolean = false
 ): R {
     return uploadBase(
         url,
         HTTPVerbs.POST,
         data,
-        dataClazz,
         dataSerializer,
-        responseClazz,
-        responseSerializer
+        responseSerializer,
+        debug
     )
 }
-
 
 @UnstableDefault
 suspend inline fun <reified R : Any> getBase(
@@ -126,7 +123,7 @@ suspend inline fun <reified R : Any> getBase(
     serializer: KSerializer<R>,
     debug: Boolean = false
 ): R {
-    if (debug) console.log("Fetching for url $url, and class of ${clazz.simpleName}")
+    if (debug) console.log("getBase for url: $url, class: ${clazz.simpleName}, descriptor: ${serializer.descriptor.name}")
     val rawData = httpGet(url)
     if (debug) console.log(rawData)
     val parsed = Json.nonstrict.parse(serializer, rawData)
