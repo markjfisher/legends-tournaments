@@ -1,6 +1,7 @@
 plugins {
     id("com.github.ben-manes.versions")
     kotlin("jvm") apply false
+    id("kotlin2js") apply false
 }
 
 tasks {

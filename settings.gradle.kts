@@ -1,6 +1,7 @@
 rootProject.name = "legends-tournaments-app"
 
 include(
+    "tournament-front-end",
     "api"
 )
 
@@ -14,6 +15,8 @@ pluginManagement {
     resolutionStrategy {
         eachPlugin {
             when(requested.id.id) {
+                "kotlin2js" -> useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+                "kotlinx-serialization" -> useModule("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
                 "org.jetbrains.kotlin.jvm" -> useVersion(kotlinVersion)
                 "org.jetbrains.kotlin.kapt" -> useVersion(kotlinVersion)
                 "org.jetbrains.kotlin.plugin.allopen" -> useVersion(kotlinVersion)
