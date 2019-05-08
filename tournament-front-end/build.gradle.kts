@@ -14,6 +14,9 @@ dependencies {
     implementation("com.narbase:kunafa:0.2.0-beta")
 
     testImplementation(kotlin("stdlib-js"))
+    
+    // java only! not js
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.1")
 }
 
 tasks {

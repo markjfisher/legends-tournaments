@@ -7,10 +7,16 @@ import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.lifecycle.LifecycleOwner
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.UnstableDefault
 
-fun main(args: Array<String>) {
+@UnstableDefault
+fun main() {
     GlobalScope.launch {
         Stuff().getThing()
+        val postThing = Stuff().postThing(Thing(name = "post thing from web"))
+        console.log("post: got $postThing")
+        val putThing = Stuff().putThing(Thing(name = "put thing from web"))
+        console.log("post: got $putThing")
     }
 
     page {
