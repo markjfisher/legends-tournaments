@@ -10,6 +10,8 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.reflect.KClass
 
+// adapted from https://medium.com/@animusdesign/kotlin-js-rest-interactions-bd117e49727b
+
 /**
  * An enum representing supported HTTP verbs.
  */

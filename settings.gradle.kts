@@ -1,7 +1,7 @@
 rootProject.name = "legends-tournaments-app"
 
 include(
-    "tournament-front-end",
+    "front-end",
     "api"
 )
 

@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(kotlin("stdlib-js"))
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.2.1")
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.2.1")
 
@@ -13,8 +14,11 @@ dependencies {
 
     implementation("com.narbase:kunafa:0.2.0-beta")
 
+    // waiting for korio to support kotlin 1.3.3x
+    // implementation("com.soywiz:korio-js:0.20.0")
+
     testImplementation(kotlin("stdlib-js"))
-    
+
     // java only! not js
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.1")
 }
@@ -41,47 +45,31 @@ tasks {
         }
     }
 
-    val unpackKotlinJsStdlib by registering {
-        group = "build"
-        description = "Unpack the Kotlin JavaScript standard library"
-        val outputDir = file("$buildDir/$name")
-        inputs.property("compileClasspath", configurations.compileClasspath.get())
-        outputs.dir(outputDir)
-        doLast {
-            copyJar(outputDir, "kotlin-stdlib-js-.+\\.jar")
-        }
-    }
+    val jsLibs = listOf(
+        "kotlin-stdlib-js-.+\\.jar",
+        "kotlinx-serialization-runtime-js-.+\\.jar",
+        "kotlinx-coroutines-core-js-.+\\.jar",
+        "kunafa-.+\\.jar"
 
-    val unpackKunafaLib by registering {
-        group = "build"
-        description = "Unpack the kunafa library"
-        val outputDir = file("$buildDir/$name")
-        inputs.property("compileClasspath", configurations.compileClasspath.get())
-        outputs.dir(outputDir)
-        doLast {
-            copyJar(outputDir, "kunafa-.+\\.jar")
-        }
-    }
+        // waiting for korio to work with kotlin 1.3.3x
+//        "klock-js-.+\\.jar",
+//        "kmem-js-.+\\.jar",
+//        "kds-js-.+\\.jar",
+//        "korinject-js-.+\\.jar",
+//        "kzlib-js-.+\\.jar",
+//        "korio-js-.+\\.jar"
+    )
 
-    val unpackSerializationRuntimeLib by registering {
+    val unpackJsLibs by registering {
         group = "build"
-        description = "Unpack the serialization library"
+        description = "Unpack JavaScript standard libraries"
         val outputDir = file("$buildDir/$name")
         inputs.property("compileClasspath", configurations.compileClasspath.get())
         outputs.dir(outputDir)
         doLast {
-            copyJar(outputDir, "kotlinx-serialization-runtime-js-.+\\.jar")
-        }
-    }
-
-    val unpackCoroutinesLib by registering {
-        group = "build"
-        description = "Unpack the serialization library"
-        val outputDir = file("$buildDir/$name")
-        inputs.property("compileClasspath", configurations.compileClasspath.get())
-        outputs.dir(outputDir)
-        doLast {
-            copyJar(outputDir, "kotlinx-coroutines-core-js-.+\\.jar")
+            jsLibs.forEach { lib ->
+                copyJar(outputDir, lib)
+            }
         }
     }
 
@@ -89,10 +77,7 @@ tasks {
         group = "build"
         description = "Assemble the web application"
         includeEmptyDirs = false
-        from(unpackKotlinJsStdlib)
-        from(unpackKunafaLib)
-        from(unpackSerializationRuntimeLib)
-        from(unpackCoroutinesLib)
+        from(unpackJsLibs)
         from(sourceSets.main.get().output) {
             exclude("**/*.kjsm")
         }
