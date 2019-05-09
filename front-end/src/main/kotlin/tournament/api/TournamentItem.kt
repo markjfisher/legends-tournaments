@@ -9,13 +9,15 @@ import com.narbase.kunafa.core.drawable.Color
 
 class TournamentItem(
     private val tournamentPM: TournamentPM,
-    private val onDeleteClicked: (id: Int) -> Unit
+    private val onDeleteClicked: (id: Int) -> Unit,
+    private val onToggleState: (id: Int) -> Unit
 ) : Component() {
     private var checkboxView: View? = null
     private var todoTextView: TextView? = null
 
     override fun View?.getView() = horizontalLayout {
         addRuleSet(Style.rootLayout)
+        onClick = { onToggleState(tournamentPM.id) }
 
         checkboxView = view {
             addRuleSet(Style.circleBasic)
@@ -37,6 +39,16 @@ class TournamentItem(
         }
     }
 
+    fun markDone() {
+        checkboxView?.addRuleSet(Style.circleDone)
+        todoTextView?.addRuleSet(Style.textDone)
+    }
+
+    fun markUndone() {
+        checkboxView?.removeRuleSet(Style.circleDone)
+        todoTextView?.removeRuleSet(Style.textDone)
+    }
+
     companion object {
         object Style {
             val circleBasic = classRuleSet {
@@ -45,6 +57,14 @@ class TournamentItem(
                 borderRadius = 8.px.toString()
                 border = "1px solid #888"
                 marginRight = 8.px
+            }
+            val circleDone = classRuleSet {
+                backgroundColor = Color(100, 240, 100)
+                border = "1px solid ${Color(100, 240, 100).toCss()}"
+            }
+            val textDone = classRuleSet {
+                textDecoration = "line-through"
+                color = Color("#ccc")
             }
             val deleteButtonStyle = classRuleSet {
                 borderRadius = 4.px.toString()

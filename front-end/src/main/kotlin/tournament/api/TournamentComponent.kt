@@ -19,6 +19,7 @@ class TournamentComponent(private val viewModel: TournamentViewModel) : Componen
         console.log("View mounted, setting up observers")
         viewModel.onItemAdded.observe(::addItem)
         viewModel.onItemDeleted.observe(::deleteItem)
+        viewModel.onItemUpdated.observe(::updateItem)
     }
 
     private fun onButtonClicked() {
@@ -28,7 +29,7 @@ class TournamentComponent(private val viewModel: TournamentViewModel) : Componen
 
     private fun addItem(pm: TournamentPM?) {
         pm ?: return
-        val component = TournamentItem(pm, viewModel::deleteItem)
+        val component = TournamentItem(pm, viewModel::deleteItem, viewModel::toggleItemStatus)
         listLayout?.mount(component)
         tournamentViews[pm.id] = component
     }
@@ -38,6 +39,16 @@ class TournamentComponent(private val viewModel: TournamentViewModel) : Componen
         val component = tournamentViews[pm.id] ?: return
         listLayout?.unMount(component)
         tournamentViews.remove(pm.id)
+    }
+
+    private fun updateItem(pm: TournamentPM?) {
+        pm ?: return
+        val component = tournamentViews[pm.id] ?: return
+        if (pm.isDone) {
+            component.markDone()
+        } else {
+            component.markUndone()
+        }
     }
 
     override fun View?.getView() = horizontalLayout {
