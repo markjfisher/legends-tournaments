@@ -10,6 +10,7 @@ val gradleVersionsVersion: String by settings
 val shadowVersion: String by settings
 val springDependencyManagementVersion: String by settings
 val jibVersion: String by settings
+val dockerRemoteAPIVersion: String by settings
 
 pluginManagement {
     resolutionStrategy {
@@ -24,6 +25,7 @@ pluginManagement {
                 "com.github.johnrengelman.shadow" -> useVersion(shadowVersion)
                 "com.github.ben-manes.versions" -> useVersion(gradleVersionsVersion)
                 "com.google.cloud.tools.jib" -> useVersion(jibVersion)
+                "com.bmuschko.docker-remote-api" -> useVersion(dockerRemoteAPIVersion)
             }
         }
     }
