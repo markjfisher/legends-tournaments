@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: static-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: legends-tournaments-frontend
+  template:
+    metadata:
+      labels:
+        app: legends-tournaments-frontend
+    spec:
+      containers:
+      - name: legends-tournaments-frontend-pod
+        image: markjfisher/legends-tournaments-frontend
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80

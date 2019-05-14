@@ -2,21 +2,20 @@
 
 A rule based tournament API
 
+TODO: clean this up when we have a decent pipeline
+
 # Building
 
 ## Normal dev
 
     ./gradlew
 
-## Building a docker image for google
+## skaffold
 
-    ./scripts/authenticate-to-gke.sh
-    ./scripts/build-deploy-docker.sh
+    ./gradlew createDockerImage
+    skaffold dev --trigger notify
 
-## Pushing image to k8s
-
-    ./scripts/authenticate-to-gke.sh
-    ./scripts/deploy-to-k8s.sh testing
+TODO: gradle builds into skaffold directly, and depends on the createDockerImage task
 
 # Google setup
 

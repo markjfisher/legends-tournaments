@@ -1,0 +1,14 @@
+apiVersion: skaffold/v1beta10
+kind: Config
+build:
+  artifacts:
+  - image: markjfisher/legends-tournaments-frontend
+    context: front-end/build/docker
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - k8s/local-front-end/*.yaml
+    flags:
+      global: ["--validate=false"]

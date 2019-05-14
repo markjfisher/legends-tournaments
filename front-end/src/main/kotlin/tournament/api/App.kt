@@ -16,7 +16,7 @@ fun main() {
             link("/about") { text = "About" }
             route("/", isExact = true) {
                 textView {
-                    text = "Home page"
+                    text = "Home page here"
                 }
             }
             route("/about") {

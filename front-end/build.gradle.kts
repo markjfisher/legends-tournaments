@@ -27,6 +27,8 @@ dependencies {
 
     implementation("com.narbase:kunafa:$kunafaVersion")
 
+    // compileOnly("com.bmuschko:gradle-docker-plugin:4.8.1")
+
     // waiting for korio to support kotlin 1.3.3x
     // implementation("com.soywiz:korio-js:$korioJsVersion")
 
@@ -39,7 +41,7 @@ dependencies {
 tasks {
     val copyWebDir by registering(Copy::class) {
         group = "build"
-        dependsOn(assemble)
+        dependsOn(build)
         from("$buildDir/web")
         into("$buildDir/docker")
     }
@@ -61,7 +63,6 @@ tasks {
     val removeDockerContainer by registering(DockerRemoveContainer::class) {
         targetContainerId("tournament-front-end")
         onError {
-            // Ignore exception if container does not exist otherwise throw it
             if (!this.message!!.contains("No such container"))
                 throw this
         }
@@ -94,6 +95,7 @@ tasks {
         dependsOn(startDockerContainer)
         finalizedBy(stopDockerContainer)
     }
+
 
     compileKotlin2Js {
         kotlinOptions {
