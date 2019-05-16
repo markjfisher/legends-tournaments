@@ -1,17 +1,18 @@
-package tournament.api
+package tournament.api.viewmodel
 
 import com.narbase.kunafa.core.lifecycle.Observable
+import tournament.api.model.TournamentModel
 
 class TournamentViewModel {
-    val onItemAdded = Observable<TournamentPM>()
-    val onItemDeleted = Observable<TournamentPM>()
-    val onItemUpdated = Observable<TournamentPM>()
+    val onItemAdded = Observable<TournamentModel>()
+    val onItemDeleted = Observable<TournamentModel>()
+    val onItemUpdated = Observable<TournamentModel>()
 
-    private val tournamentItemsList = mutableListOf<TournamentPM>()
+    private val tournamentItemsList = mutableListOf<TournamentModel>()
 
     fun addNewTournament(tournamentText: String?) {
         if (tournamentText.isNullOrBlank()) return
-        val pm = TournamentPM(tournamentText)
+        val pm = TournamentModel(tournamentText)
         tournamentItemsList.add(pm)
         onItemAdded.value = pm
     }

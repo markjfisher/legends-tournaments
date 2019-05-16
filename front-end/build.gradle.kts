@@ -46,9 +46,16 @@ tasks {
         into("$buildDir/docker")
     }
 
+    val copyStatic by registering(Copy::class) {
+        group = "build"
+        from("$projectDir/static")
+        into("$buildDir/docker/")
+    }
+
     val createDockerFile by registering(Dockerfile::class) {
         group = "build"
         dependsOn(copyWebDir)
+        dependsOn(copyStatic)
         from("nginx:alpine")
         copyFile(".", "/usr/share/nginx/html")
         label(mapOf("maintainer" to "Mark Fisher 'mark.j.fisher@gmail.com'"))
@@ -87,7 +94,7 @@ tasks {
     val stopDockerContainer by registering(DockerStopContainer::class) {
         // This only works when running entire functionTestApp task, as the containerId is not known otherwise
         group = "docker"
-        targetContainerId(createDockerContainer.get().containerId)
+        targetContainerId("tournament-front-end")
     }
 
     register("functionTestApp", Test::class) {

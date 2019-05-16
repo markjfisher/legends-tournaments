@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: legends-tournaments-frontend-service
+  namespace: tournament
 spec:
   type: LoadBalancer
   ports:

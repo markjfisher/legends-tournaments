@@ -1,4 +1,4 @@
-package tournament.api
+package tournament.api.view
 
 import com.narbase.kunafa.core.components.*
 import com.narbase.kunafa.core.components.layout.LinearLayout
@@ -9,6 +9,8 @@ import com.narbase.kunafa.core.dimensions.dependent.wrapContent
 import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.drawable.Color
 import com.narbase.kunafa.core.lifecycle.LifecycleOwner
+import tournament.api.model.TournamentModel
+import tournament.api.viewmodel.TournamentViewModel
 
 class TournamentComponent(private val viewModel: TournamentViewModel) : Component() {
     private var listLayout: LinearLayout? = null
@@ -27,21 +29,21 @@ class TournamentComponent(private val viewModel: TournamentViewModel) : Componen
         tournamentTextInput?.text = ""
     }
 
-    private fun addItem(pm: TournamentPM?) {
+    private fun addItem(pm: TournamentModel?) {
         pm ?: return
         val component = TournamentItem(pm, viewModel::deleteItem, viewModel::toggleItemStatus)
         listLayout?.mount(component)
         tournamentViews[pm.id] = component
     }
 
-    private fun deleteItem(pm: TournamentPM?) {
+    private fun deleteItem(pm: TournamentModel?) {
         pm ?: return
         val component = tournamentViews[pm.id] ?: return
         listLayout?.unMount(component)
         tournamentViews.remove(pm.id)
     }
 
-    private fun updateItem(pm: TournamentPM?) {
+    private fun updateItem(pm: TournamentModel?) {
         pm ?: return
         val component = tournamentViews[pm.id] ?: return
         if (pm.isDone) {

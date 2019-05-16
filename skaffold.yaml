@@ -9,6 +9,6 @@ build:
 deploy:
   kubectl:
     manifests:
-    - k8s/local-front-end/*.yaml
+    - k8s/local-fe-all/deployment.yaml
     flags:
       global: ["--validate=false"]

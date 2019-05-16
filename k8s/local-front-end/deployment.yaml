@@ -2,6 +2,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: static-deployment
+  namespace: tournament
 spec:
   replicas: 1
   selector:
@@ -13,7 +14,7 @@ spec:
         app: legends-tournaments-frontend
     spec:
       containers:
-      - name: legends-tournaments-frontend-pod
+      - name: static-deployment-pod
         image: markjfisher/legends-tournaments-frontend
         imagePullPolicy: IfNotPresent
         ports:

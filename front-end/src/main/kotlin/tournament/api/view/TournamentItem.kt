@@ -1,4 +1,4 @@
-package tournament.api
+package tournament.api.view
 
 import com.narbase.kunafa.core.components.*
 import com.narbase.kunafa.core.css.*
@@ -6,9 +6,10 @@ import com.narbase.kunafa.core.dimensions.dependent.matchParent
 import com.narbase.kunafa.core.dimensions.dependent.weightOf
 import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.drawable.Color
+import tournament.api.model.TournamentModel
 
 class TournamentItem(
-    private val tournamentPM: TournamentPM,
+    private val tournamentPM: TournamentModel,
     private val onDeleteClicked: (id: Int) -> Unit,
     private val onToggleState: (id: Int) -> Unit
 ) : Component() {
