@@ -1,4 +1,4 @@
-package tournament.api.model
+package tournament.api.kunafa.model
 
 data class TournamentModel(val text: String, var isDone: Boolean = false) {
     val id: Int = nextId

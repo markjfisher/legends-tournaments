@@ -1,4 +1,4 @@
-package tournament.api.view
+package tournament.api.kunafa.view
 
 import com.narbase.kunafa.core.components.*
 import com.narbase.kunafa.core.css.*
@@ -6,7 +6,7 @@ import com.narbase.kunafa.core.dimensions.dependent.matchParent
 import com.narbase.kunafa.core.dimensions.dependent.weightOf
 import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.drawable.Color
-import tournament.api.model.TournamentModel
+import tournament.api.kunafa.model.TournamentModel
 
 class TournamentItem(
     private val tournamentPM: TournamentModel,
@@ -17,11 +17,11 @@ class TournamentItem(
     private var todoTextView: TextView? = null
 
     override fun View?.getView() = horizontalLayout {
-        addRuleSet(Style.rootLayout)
+        addRuleSet(Companion.Style.rootLayout)
         onClick = { onToggleState(tournamentPM.id) }
 
         checkboxView = view {
-            addRuleSet(Style.circleBasic)
+            addRuleSet(Companion.Style.circleBasic)
         }
 
 
@@ -36,18 +36,18 @@ class TournamentItem(
         button {
             text = "Delete"
             onClick = { onDeleteClicked(tournamentPM.id) }
-            addRuleSet(Style.deleteButtonStyle)
+            addRuleSet(Companion.Style.deleteButtonStyle)
         }
     }
 
     fun markDone() {
-        checkboxView?.addRuleSet(Style.circleDone)
-        todoTextView?.addRuleSet(Style.textDone)
+        checkboxView?.addRuleSet(Companion.Style.circleDone)
+        todoTextView?.addRuleSet(Companion.Style.textDone)
     }
 
     fun markUndone() {
-        checkboxView?.removeRuleSet(Style.circleDone)
-        todoTextView?.removeRuleSet(Style.textDone)
+        checkboxView?.removeRuleSet(Companion.Style.circleDone)
+        todoTextView?.removeRuleSet(Companion.Style.textDone)
     }
 
     companion object {

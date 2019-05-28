@@ -19,7 +19,12 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url = uri("https://dl.bintray.com/kotlin/kotlin-eap/")
+        }
+
         maven(url = "https://plugins.gradle.org/m2/")
+        maven(url = "https://jcenter.bintray.com/")
     }
 
     group = "net.markjfisher"

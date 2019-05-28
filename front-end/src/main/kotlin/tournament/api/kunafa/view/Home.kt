@@ -1,13 +1,12 @@
-package tournament.api.view
+package tournament.api.kunafa.view
 
 import com.narbase.kunafa.core.components.*
 import com.narbase.kunafa.core.css.*
 import com.narbase.kunafa.core.dimensions.dependent.matchParent
-import com.narbase.kunafa.core.dimensions.dependent.weightOf
 import com.narbase.kunafa.core.dimensions.pc
 import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.drawable.Color
-import tournament.api.view.Home.Companion.HomeStyles.textStyle
+import tournament.api.kunafa.view.Home.Companion.HomeStyles.textStyle
 
 class Home : Component() {
     // complementary from first 3 colours, based on samples from mech-dragon pic
@@ -36,12 +35,12 @@ class Home : Component() {
             a {
                 href = "#home"
                 text = "Home"
-                addRuleSet(HomeStyles.navbarA)
+                addRuleSet(Companion.HomeStyles.navbarA)
             }
             a {
                 href = "#about"
                 text = "About"
-                addRuleSet(HomeStyles.navbarA)
+                addRuleSet(Companion.HomeStyles.navbarA)
             }
         }
 

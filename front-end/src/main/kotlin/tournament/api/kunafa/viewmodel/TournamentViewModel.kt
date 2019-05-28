@@ -1,7 +1,7 @@
-package tournament.api.viewmodel
+package tournament.api.kunafa.viewmodel
 
 import com.narbase.kunafa.core.lifecycle.Observable
-import tournament.api.model.TournamentModel
+import tournament.api.kunafa.model.TournamentModel
 
 class TournamentViewModel {
     val onItemAdded = Observable<TournamentModel>()

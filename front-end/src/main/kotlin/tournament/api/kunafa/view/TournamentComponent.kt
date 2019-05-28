@@ -1,4 +1,4 @@
-package tournament.api.view
+package tournament.api.kunafa.view
 
 import com.narbase.kunafa.core.components.*
 import com.narbase.kunafa.core.components.layout.LinearLayout
@@ -9,8 +9,8 @@ import com.narbase.kunafa.core.dimensions.dependent.wrapContent
 import com.narbase.kunafa.core.dimensions.px
 import com.narbase.kunafa.core.drawable.Color
 import com.narbase.kunafa.core.lifecycle.LifecycleOwner
-import tournament.api.model.TournamentModel
-import tournament.api.viewmodel.TournamentViewModel
+import tournament.api.kunafa.model.TournamentModel
+import tournament.api.kunafa.viewmodel.TournamentViewModel
 
 class TournamentComponent(private val viewModel: TournamentViewModel) : Component() {
     private var listLayout: LinearLayout? = null

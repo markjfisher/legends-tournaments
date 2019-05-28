@@ -1,19 +1,15 @@
-package tournament.api
+package tournament.api.kunafa
 
 import com.narbase.kunafa.core.components.horizontalLayout
 import com.narbase.kunafa.core.components.page
-import com.narbase.kunafa.core.components.textView
 import com.narbase.kunafa.core.components.verticalLayout
-import com.narbase.kunafa.core.css.*
-import com.narbase.kunafa.core.dimensions.dependent.matchParent
-import com.narbase.kunafa.core.dimensions.pc
-import com.narbase.kunafa.core.dimensions.px
-import com.narbase.kunafa.core.routing.link
+import com.narbase.kunafa.core.css.backgroundImage
+import com.narbase.kunafa.core.css.backgroundPosition
+import com.narbase.kunafa.core.css.backgroundRepeat
+import com.narbase.kunafa.core.css.backgroundSize
 import com.narbase.kunafa.core.routing.route
 import kotlinx.serialization.UnstableDefault
-import tournament.api.view.Home
-import tournament.api.view.TournamentComponent
-import tournament.api.viewmodel.TournamentViewModel
+import tournament.api.kunafa.view.Home
 
 @UnstableDefault
 fun main() {
