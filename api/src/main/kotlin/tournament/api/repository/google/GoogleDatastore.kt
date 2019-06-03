@@ -1,4 +1,4 @@
-package tournament.api.repository
+package tournament.api.repository.google
 
 import com.google.cloud.datastore.Datastore
 import com.google.cloud.datastore.DatastoreOptions
@@ -38,5 +38,5 @@ class KeyFactoryConfig(private val datastore: Datastore) {
     @Singleton
     @Bean
     @Named("Tournament")
-    fun createTournamentKeyFactory() : KeyFactory = datastore.newKeyFactory().setKind(TournamentEntityRepository.TOURNAMENT_KIND)
+    fun createTournamentKeyFactory() : KeyFactory = datastore.newKeyFactory().setKind(DatastoreRepository.TOURNAMENT_KIND)
 }

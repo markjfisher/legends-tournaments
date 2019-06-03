@@ -7,10 +7,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import tournament.api.repository.ReturnStatus
 import tournament.api.repository.Tournament
-import tournament.api.repository.TournamentEntityRepository
+import tournament.api.repository.TournamentRepository
 
 internal class TournamentServiceTest {
-    private val repository = mockk<TournamentEntityRepository>()
+    private val repository = mockk<TournamentRepository>()
 
     @Test
     fun `when no id matches a null tournament is returned`() {
@@ -25,7 +25,7 @@ internal class TournamentServiceTest {
 
     @Test
     fun `when there are no tournaments in the repo an empty list is returned`() {
-        every { repository.getAllTournaments() } returns emptyList()
+        every { repository.getTournaments() } returns emptyList()
 
         // When
         val tournaments = DefaultTournamentService(repository).getTournaments()
@@ -37,7 +37,7 @@ internal class TournamentServiceTest {
     @Test
     fun `the returned tournaments from the repository is returned by service`() {
         val listOfTournaments = listOf(Tournament(id = "1", name = "Test Tournament 1"), Tournament(id = "2", name = "Test Tournament 2"))
-        every { repository.getAllTournaments() } returns listOfTournaments
+        every { repository.getTournaments() } returns listOfTournaments
 
         // When
         val tournaments = DefaultTournamentService(repository).getTournaments()

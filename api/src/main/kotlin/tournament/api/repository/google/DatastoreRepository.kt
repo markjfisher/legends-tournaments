@@ -1,4 +1,4 @@
-package tournament.api.repository
+package tournament.api.repository.google
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -7,20 +7,23 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.uuid.Generators
 import com.google.cloud.Timestamp
 import com.google.cloud.datastore.*
+import io.micronaut.context.annotation.Requires
 import io.micronaut.http.HttpStatus
-import mu.KotlinLogging
-import tournament.api.repository.TournamentEntityRepository.Companion.TOURNAMENT_JSON_PROPERTY
+import tournament.api.repository.RepositoryException
+import tournament.api.repository.ReturnStatus
+import tournament.api.repository.Tournament
+import tournament.api.repository.TournamentRepository
+import tournament.api.repository.google.DatastoreRepository.Companion.TOURNAMENT_JSON_PROPERTY
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 
-private val logger = KotlinLogging.logger {}
-
 @Singleton
-open class TournamentEntityRepository(
+@Requires(env = ["cloud"], notEnv = ["test"])
+open class DatastoreRepository(
     private val datastore: Datastore
-) {
+) : TournamentRepository {
     private val keyFactories = ConcurrentHashMap<String, KeyFactory>()
 
     companion object {
@@ -31,19 +34,19 @@ open class TournamentEntityRepository(
         const val TOURNAMENT_KIND = "Tournament"
     }
 
-    fun getAllTournaments(): List<Tournament> {
-        return getTournaments()
+    override fun getTournaments(): List<Tournament> {
+        return fetchTournaments()
     }
 
-    fun getTournamentById(id: String): Tournament? {
-        return getTournaments(id, this::matchOnTournamentId).firstOrNull()
+    override fun getTournamentById(id: String): Tournament? {
+        return fetchTournaments(id, this::matchOnTournamentId).firstOrNull()
     }
 
-    fun getTournamentByName(name: String): Tournament? {
-        return getTournaments(name, this::matchOnTournamentName).firstOrNull()
+    override fun getTournamentByName(name: String): Tournament? {
+        return fetchTournaments(name, this::matchOnTournamentName).firstOrNull()
     }
 
-    private fun getTournaments(
+    private fun fetchTournaments(
         queryValue: String = "",
         matcher: (v: String) -> StructuredQuery.PropertyFilter? = { null }
     ): List<Tournament> {
@@ -65,7 +68,7 @@ open class TournamentEntityRepository(
     private fun matchOnTournamentId(id: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_ID_PROPERTY, id)
     private fun matchOnTournamentName(name: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_NAME_PROPERTY, name)
 
-    open fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
         val tournamentByName = getTournamentByName(tournament.name)
         if (tournamentByName != null) {
             return Pair(
@@ -94,7 +97,7 @@ open class TournamentEntityRepository(
         }
     }
 
-    open fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
         getTournamentById(tournament.id) ?: return saveTournament(tournament)
 
         // update it
@@ -115,7 +118,7 @@ open class TournamentEntityRepository(
         }
     }
 
-    open fun deleteTournament(id: String): HttpStatus {
+    override fun deleteTournament(id: String): HttpStatus {
         if (getTournamentById(id) == null) {
             return HttpStatus.NOT_FOUND
         }
@@ -123,7 +126,9 @@ open class TournamentEntityRepository(
         var transaction: Transaction? = null
         try {
             transaction = datastore.newTransaction()
-            transaction.delete(getKey(id, TOURNAMENT_KIND))
+            transaction.delete(getKey(id,
+                TOURNAMENT_KIND
+            ))
             transaction.commit()
             return HttpStatus.ACCEPTED
         } catch (e: Exception) {
@@ -138,15 +143,15 @@ open class TournamentEntityRepository(
 
     private fun createEntity(tournament: Tournament): Entity {
         return Entity
-            .newBuilder(getKey(tournament.id, TOURNAMENT_KIND))
+            .newBuilder(getKey(tournament.id,
+                TOURNAMENT_KIND
+            ))
             .set(TOURNAMENT_ID_PROPERTY, tournament.id)
             .set(TOURNAMENT_NAME_PROPERTY, tournament.name)
             .set(TOURNAMENT_DATE_PROPERTY, Timestamp.of(Date.from(tournament.date)))
-            .set(
-                TOURNAMENT_JSON_PROPERTY, StringValue.newBuilder(tournament.asJson())
+            .set(TOURNAMENT_JSON_PROPERTY, StringValue.newBuilder(tournament.asJson())
                     .setExcludeFromIndexes(true)
-                    .build()
-            )
+                    .build())
             .build()
     }
 
@@ -163,11 +168,6 @@ open class TournamentEntityRepository(
 
 
 }
-
-data class ReturnStatus(
-    val message: String,
-    val httpStatus: HttpStatus
-)
 
 private val mapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
