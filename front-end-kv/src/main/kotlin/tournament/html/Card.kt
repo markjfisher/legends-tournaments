@@ -7,22 +7,23 @@ import pl.treksoft.kvision.html.H4.Companion.h4
 import pl.treksoft.kvision.html.P.Companion.p
 import pl.treksoft.kvision.utils.rem
 
-data class Card(
-    val cardHeader: String = "",
-    val cardTitle: String = "",
-    val cardText: String = "",
-    val cardType: CardType = CardType.PRIMARY,
-    val mainTextColour: String = "text-white"
-) {
+// This needs implementing in CSS as it's not part of Bootswatch 3
+
+class Card {
     companion object {
-        fun Container.createCard(card: Card): Div {
-            console.log("card: $card")
-            return div(classes = setOf("card", "mb-3", card.mainTextColour, card.cardType.className)) {
+        fun Container.createCard(
+            header: String,
+            title: String,
+            text: String,
+            mainTextColour: String,
+            type: CardType = CardType.PRIMARY
+        ): Div {
+            return div(classes = setOf("card", "mb-3", mainTextColour, type.className)) {
                 maxWidth = 20.rem
-                div(content = card.cardHeader, classes = setOf("card-header"))
+                div(content = header, classes = setOf("card-header"))
                 div(classes = setOf("card-body")) {
-                    h4(content = card.cardTitle, classes = setOf("card-title"))
-                    p(content = card.cardText, classes = setOf("card-text"))
+                    h4(content = title, classes = setOf("card-title"))
+                    p(content = text, classes = setOf("card-text"))
                 }
             }
         }

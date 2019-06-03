@@ -33,16 +33,18 @@ repositories {
     maven { url = 'https://kotlin.bintray.com/kotlinx' }
     maven { url = 'https://dl.bintray.com/gbaldeck/kotlin' }
     maven { url = 'https://dl.bintray.com/rjaros/kotlin' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     mavenLocal()
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:${kotlinVersion}"
     compile "pl.treksoft:kvision:${kvisionVersion}"
+    compile "pl.treksoft:kvision-bootstrap:${kvisionVersion}"
     compile "pl.treksoft:kvision-i18n:${kvisionVersion}"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:${kotlinVersion}"
 //    testCompile 'org.opentest4j:opentest4j:1.1.1'
-//    testCompile "com.willowtreeapps.assertk:assertk-js:${assertKVersion}"
+    testCompile "com.willowtreeapps.assertk:assertk-js:${assertKVersion}"
 }
 
 kotlinFrontend {
