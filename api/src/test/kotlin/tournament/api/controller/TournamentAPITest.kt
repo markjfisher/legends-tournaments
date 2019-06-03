@@ -14,7 +14,8 @@ import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import tournament.api.createPair
+import tournament.api.createResult
+import tournament.api.repository.ServiceStatus
 import tournament.api.repository.Tournament
 import tournament.api.service.DefaultTournamentService
 import tournament.api.service.TournamentService
@@ -138,7 +139,7 @@ class TournamentAPITest {
 
     @Test
     fun `should return saved tournament when created`() {
-        every { service.saveTournament(any()) } returns createPair(item = tournament, httpStatus = HttpStatus.CREATED)
+        every { service.saveTournament(any()) } returns createResult(item = tournament, httpStatus = ServiceStatus.CREATED)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", tournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))
@@ -156,7 +157,7 @@ class TournamentAPITest {
     @Test
     fun `should fail gracefully when validation fails`() {
         val incompleteTournament = Tournament(id = "x")
-        every { service.saveTournament(any()) } returns createPair(item = incompleteTournament, httpStatus = HttpStatus.CREATED)
+        every { service.saveTournament(any()) } returns createResult(item = incompleteTournament, httpStatus = ServiceStatus.CREATED)
 
         val request: HttpRequest<Tournament>? = HttpRequest.POST("/tournament/", incompleteTournament)
         val response = client.toBlocking().exchange(request, Argument.of(Tournament::class.java))

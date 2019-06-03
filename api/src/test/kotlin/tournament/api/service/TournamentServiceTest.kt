@@ -1,11 +1,11 @@
 package tournament.api.service
 
-import io.micronaut.http.HttpStatus
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import tournament.api.repository.ReturnStatus
+import tournament.api.repository.ServiceResult
+import tournament.api.repository.ServiceStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentRepository
 
@@ -49,16 +49,16 @@ internal class TournamentServiceTest {
     @Test
     fun `when a tournament is saved in the repo it is also returned by the service`() {
         val testTournament = Tournament(id = "1", name = "Test Tournament 1")
-        every { repository.saveTournament(any()) } returns createPair(testTournament)
+        every { repository.saveTournament(any()) } returns createResult(testTournament)
 
         // When
-        val tournament = DefaultTournamentService(repository).saveTournament(testTournament).second
+        val tournament = DefaultTournamentService(repository).saveTournament(testTournament).tournament
 
         assertThat(tournament).isEqualTo(testTournament)
     }
 
-    private fun createPair(tournament: Tournament): Pair<ReturnStatus, Tournament> {
-        return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.OK), tournament)
+    private fun createResult(tournament: Tournament): ServiceResult {
+        return ServiceResult(message = "", serviceStatus = ServiceStatus.OK, tournament = tournament)
     }
 
 }

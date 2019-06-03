@@ -9,6 +9,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import tournament.api.repository.Tournament
 import tournament.api.service.TournamentService
+import tournament.api.repository.ServiceStatus
 import javax.annotation.security.PermitAll
 import javax.validation.Valid
 
@@ -34,11 +35,11 @@ class TournamentController(private val service: TournamentService) {
     fun createTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<String>> {
         return tournament
             .map { t ->
-                val (status, saved) = service.saveTournament(t)
+                val result = service.saveTournament(t)
                 when {
-                    status.httpStatus == HttpStatus.CREATED -> HttpResponse.created(saved.asJson())
-                    status.httpStatus == HttpStatus.CONFLICT -> HttpResponse.status(status.httpStatus, status.message)
-                    else -> HttpResponse.badRequest("Could not create tournament: ${status.message}")
+                    result.serviceStatus == ServiceStatus.CREATED -> HttpResponse.created(result.tournament!!.asJson())
+                    result.serviceStatus == ServiceStatus.CONFLICT -> HttpResponse.status(HttpStatus.CONFLICT, result.message)
+                    else -> HttpResponse.badRequest("Could not create tournament: ${result.message}")
                 }
             }
             .onErrorResumeNext { t: Throwable ->
@@ -51,8 +52,8 @@ class TournamentController(private val service: TournamentService) {
         return id
             .map { v ->
                 when (service.deleteTournament(v)) {
-                    HttpStatus.ACCEPTED -> HttpResponse.accepted()
-                    HttpStatus.NOT_FOUND -> HttpResponse.notFound()
+                    ServiceStatus.ACCEPTED -> HttpResponse.accepted()
+                    ServiceStatus.NOT_FOUND -> HttpResponse.notFound()
                     else -> HttpResponse.badRequest<String>("Could not delete tournament.")
                 }
             }
@@ -65,11 +66,11 @@ class TournamentController(private val service: TournamentService) {
     fun updateOrCreateTournament(@Body @Valid tournament: Single<Tournament>): Single<MutableHttpResponse<String>> {
         return tournament
             .map { t ->
-                val (status, updated) = service.updateTournament(t)
-                when (status.httpStatus) {
-                    HttpStatus.NO_CONTENT -> HttpResponse.noContent()
-                    HttpStatus.CREATED -> HttpResponse.created(updated.asJson()) // it was saved instead of updated, return the body of the item
-                    HttpStatus.CONFLICT -> HttpResponse.badRequest("Duplicate tournament name found with different id")
+                val result = service.updateTournament(t)
+                when (result.serviceStatus) {
+                    ServiceStatus.NO_CONTENT -> HttpResponse.noContent()
+                    ServiceStatus.CREATED -> HttpResponse.created(result.tournament!!.asJson()) // it was saved instead of updated, return the body of the item
+                    ServiceStatus.CONFLICT -> HttpResponse.badRequest("Duplicate tournament name found with different id")
                     else -> HttpResponse.badRequest<String>()
                 }
             }

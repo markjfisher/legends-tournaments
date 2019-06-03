@@ -1,8 +1,8 @@
 package tournament.api.repository.stub
 
 import io.micronaut.context.annotation.Requires
-import io.micronaut.http.HttpStatus
-import tournament.api.repository.ReturnStatus
+import tournament.api.repository.ServiceResult
+import tournament.api.repository.ServiceStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentRepository
 import javax.inject.Singleton
@@ -28,15 +28,15 @@ class StubbedRepository : TournamentRepository {
         return tournamentData.find { it.name.toLowerCase() == name.toLowerCase() }
     }
 
-    override fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun saveTournament(tournament: Tournament): ServiceResult {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deleteTournament(id: String): HttpStatus {
+    override fun deleteTournament(id: String): ServiceStatus {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun updateTournament(tournament: Tournament): ServiceResult {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

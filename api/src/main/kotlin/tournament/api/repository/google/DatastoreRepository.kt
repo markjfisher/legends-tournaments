@@ -8,11 +8,7 @@ import com.fasterxml.uuid.Generators
 import com.google.cloud.Timestamp
 import com.google.cloud.datastore.*
 import io.micronaut.context.annotation.Requires
-import io.micronaut.http.HttpStatus
-import tournament.api.repository.RepositoryException
-import tournament.api.repository.ReturnStatus
-import tournament.api.repository.Tournament
-import tournament.api.repository.TournamentRepository
+import tournament.api.repository.*
 import tournament.api.repository.google.DatastoreRepository.Companion.TOURNAMENT_JSON_PROPERTY
 import java.time.Instant
 import java.util.*
@@ -65,18 +61,13 @@ open class DatastoreRepository(
             .toList()
     }
 
-    private fun matchOnTournamentId(id: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_ID_PROPERTY, id)
-    private fun matchOnTournamentName(name: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_NAME_PROPERTY, name)
-
-    override fun saveTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun saveTournament(tournament: Tournament): ServiceResult {
         val tournamentByName = getTournamentByName(tournament.name)
         if (tournamentByName != null) {
-            return Pair(
-                ReturnStatus(
+            return ServiceResult(
                     message = "Found existing tournament with name ${tournament.name}",
-                    httpStatus = HttpStatus.CONFLICT
-                ),
-                tournament
+                    serviceStatus = ServiceStatus.CONFLICT,
+                    tournament = tournament
             )
         }
 
@@ -87,7 +78,7 @@ open class DatastoreRepository(
             transaction = datastore.newTransaction()
             transaction.put(createEntity(tournamentWithUUID))
             transaction.commit()
-            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.CREATED), tournamentWithUUID)
+            return ServiceResult(message = "", serviceStatus = ServiceStatus.CREATED, tournament = tournamentWithUUID)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -97,7 +88,7 @@ open class DatastoreRepository(
         }
     }
 
-    override fun updateTournament(tournament: Tournament): Pair<ReturnStatus, Tournament> {
+    override fun updateTournament(tournament: Tournament): ServiceResult {
         getTournamentById(tournament.id) ?: return saveTournament(tournament)
 
         // update it
@@ -108,7 +99,7 @@ open class DatastoreRepository(
             transaction.commit()
 
             // PUT returns either OK or NO_CONTENT
-            return Pair(ReturnStatus(message = "", httpStatus = HttpStatus.NO_CONTENT), tournament)
+            return ServiceResult(message = "", serviceStatus = ServiceStatus.NO_CONTENT, tournament = tournament)
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -118,9 +109,9 @@ open class DatastoreRepository(
         }
     }
 
-    override fun deleteTournament(id: String): HttpStatus {
+    override fun deleteTournament(id: String): ServiceStatus {
         if (getTournamentById(id) == null) {
-            return HttpStatus.NOT_FOUND
+            return ServiceStatus.NOT_FOUND
         }
 
         var transaction: Transaction? = null
@@ -130,7 +121,7 @@ open class DatastoreRepository(
                 TOURNAMENT_KIND
             ))
             transaction.commit()
-            return HttpStatus.ACCEPTED
+            return ServiceStatus.ACCEPTED
         } catch (e: Exception) {
             throw RepositoryException(cause = e)
         } finally {
@@ -140,6 +131,8 @@ open class DatastoreRepository(
         }
     }
 
+    private fun matchOnTournamentId(id: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_ID_PROPERTY, id)
+    private fun matchOnTournamentName(name: String) = StructuredQuery.PropertyFilter.eq(TOURNAMENT_NAME_PROPERTY, name)
 
     private fun createEntity(tournament: Tournament): Entity {
         return Entity
@@ -165,7 +158,6 @@ open class DatastoreRepository(
         val datastoreTimestamp = entity.getValue<TimestampValue>(TOURNAMENT_DATE_PROPERTY).get()
         return datastoreTimestamp.toDate().toInstant()
     }
-
 
 }
 

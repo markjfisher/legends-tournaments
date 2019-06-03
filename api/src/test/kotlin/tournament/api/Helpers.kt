@@ -1,8 +1,9 @@
 package tournament.api
 
-import io.micronaut.http.HttpStatus
-import tournament.api.repository.ReturnStatus
+import tournament.api.repository.ServiceResult
+import tournament.api.repository.ServiceStatus
+import tournament.api.repository.Tournament
 
-fun <T> createPair(item: T, httpStatus: HttpStatus = HttpStatus.OK, message: String = ""): Pair<ReturnStatus, T> {
-    return Pair(ReturnStatus(message = message, httpStatus = httpStatus), item)
+fun createResult(item: Tournament, httpStatus: ServiceStatus = ServiceStatus.OK, message: String = ""): ServiceResult {
+    return ServiceResult(message = message, serviceStatus = httpStatus, tournament = item)
 }
