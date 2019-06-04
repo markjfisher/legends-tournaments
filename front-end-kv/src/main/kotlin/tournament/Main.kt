@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
 fun start(state: dynamic): ApplicationBase? {
     if (document.getElementById("tournament") == null) return null
     @Suppress("UnsafeCastFromDynamic")
-    (Tournament.start(state?.appState ?: emptyMap()))
-    return Tournament
+    (TournamentApp.start(state?.appState ?: emptyMap()))
+    return TournamentApp
 }
 
