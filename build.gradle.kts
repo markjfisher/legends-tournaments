@@ -25,6 +25,7 @@ allprojects {
 
         maven(url = "https://plugins.gradle.org/m2/")
         maven(url = "https://jcenter.bintray.com/")
+        maven(url = "https://kotlin.bintray.com/kotlinx")
     }
 
     group = "net.markjfisher"

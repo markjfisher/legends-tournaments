@@ -45,6 +45,9 @@ dependencies {
     compile "pl.treksoft:kvision-i18n:${kvisionVersion}"
     compile "pl.treksoft:kvision-redux:${kvisionVersion}"
 
+    compile "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$kotlinxSerializationRuntimeVersion"
+
     testCompile "org.jetbrains.kotlin:kotlin-test-js:${kotlinVersion}"
     testCompile "com.willowtreeapps.assertk:assertk-js:${assertKVersion}"
 }
@@ -138,4 +141,20 @@ afterEvaluate {
     }
     tasks.getByName("webpack-run") { dependsOn(po2json, copyResources) }
     tasks.getByName("karma-start") { dependsOn(po2json, copyResources) }
+}
+
+task feClean {
+    def tasks = [":front-end-kv:stop", ":front-end-kv:clean", ":front-end-kv:build",  ":front-end-kv:run"]
+    for (int i = 0; i < tasks.size() - 1; i++) {
+        project.tasks.getByPath(tasks[i + 1]).mustRunAfter(project.tasks.getByPath(tasks[i]))
+    }
+    dependsOn(tasks)
+}
+
+task fe {
+    def tasks = [":front-end-kv:stop", ":front-end-kv:build",  ":front-end-kv:run"]
+    for (int i = 0; i < tasks.size() - 1; i++) {
+        project.tasks.getByPath(tasks[i + 1]).mustRunAfter(project.tasks.getByPath(tasks[i]))
+    }
+    dependsOn(tasks)
 }

@@ -20,6 +20,7 @@ import tournament.api.repository.Tournament
 import tournament.api.service.DefaultTournamentService
 import tournament.api.service.TournamentService
 import java.time.Instant
+import java.util.*
 import javax.inject.Inject
 
 @MicronautTest
@@ -40,7 +41,7 @@ class TournamentAPITest {
         Tournament(
             id = "1",
             name = "Test Tournament",
-            date = Instant.parse("2019-04-30T00:00:00.0000Z"),
+            date = Date.from(Instant.parse("2019-04-30T00:00:00.0000Z")),
             rules = listOf("rule 1", "rule 2")
         )
 
@@ -54,7 +55,7 @@ class TournamentAPITest {
 
         // Then
         assertThat(response).isEqualToIgnoringWhitespace("""
-            {"id":"1","name":"Test Tournament","date":1556582400.000000000,"rules":["rule 1","rule 2"]}
+            {"id":"1","name":"Test Tournament","date":1556582400000,"rules":["rule 1","rule 2"]}
         """.trimIndent())
     }
 
@@ -101,7 +102,7 @@ class TournamentAPITest {
 
         // Then
         assertThat(response).isEqualToIgnoringWhitespace("""
-            [{"id":"1","name":"Test Tournament","date":1556582400.000000000,"rules":["rule 1","rule 2"]}]
+            [{"id":"1","name":"Test Tournament","date":1556582400000,"rules":["rule 1","rule 2"]}]
         """.trimIndent())
     }
 

@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     kotlin("plugin.allopen")
+    id("kotlinx-serialization")
     id("com.github.johnrengelman.shadow")
     id("io.spring.dependency-management")
     id("com.google.cloud.tools.jib")
@@ -22,6 +23,8 @@ dependencyManagement {
 val junitJupiterEngineVersion: String by project
 val jacksonModuleKotlinVersion: String by project
 val kotlinLoggingVersion: String by project
+val kotlinVersion: String by project
+val kotlinxSerializationRuntimeVersion: String by project
 val logbackClassicVersion: String by project
 val micronautJunit: String by project
 val assertJVersion: String by project
@@ -36,6 +39,9 @@ val easyRulesCoreVersion: String by project
 val elderscrollsLegendsSdkJavaVersion: String by project
 
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinxSerializationRuntimeVersion")
+
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-discovery-client")
     implementation("io.micronaut:micronaut-http-server-netty")

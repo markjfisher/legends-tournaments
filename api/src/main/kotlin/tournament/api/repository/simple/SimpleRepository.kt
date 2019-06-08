@@ -6,6 +6,8 @@ import tournament.api.repository.ServiceStatus
 import tournament.api.repository.Tournament
 import tournament.api.repository.TournamentRepository
 import tournament.api.util.replace
+import java.time.Instant
+import java.util.*
 import javax.inject.Singleton
 
 @Singleton
@@ -13,8 +15,18 @@ import javax.inject.Singleton
 class SimpleRepository : TournamentRepository {
     companion object {
         private val tournamentData = mutableListOf(
-            Tournament(id = "1", name = "tournament 1", rules = listOf("epicCount == 3", "legendCount == 1", "cardCount == 50")),
-            Tournament(id = "2", name = "tournament 2", rules = listOf("epicCount == 5", "legendCount == 5", "cardCount == 75"))
+            Tournament(
+                id = "1",
+                name = "tournament 1",
+                rules = listOf("epicCount == 3", "legendCount == 1", "cardCount == 50"),
+                date = Date.from(Instant.parse("1969-03-24T06:00:00.0000Z"))
+            ),
+            Tournament(
+                id = "2",
+                name = "tournament 2",
+                rules = listOf("epicCount == 5", "legendCount == 5", "cardCount == 75"),
+                date = Date.from(Instant.parse("1973-04-12T12:00:00.0000Z"))
+            )
         )
     }
 

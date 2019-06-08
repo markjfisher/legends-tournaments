@@ -141,7 +141,7 @@ open class DatastoreRepository(
             ))
             .set(TOURNAMENT_ID_PROPERTY, tournament.id)
             .set(TOURNAMENT_NAME_PROPERTY, tournament.name)
-            .set(TOURNAMENT_DATE_PROPERTY, Timestamp.of(Date.from(tournament.date)))
+            .set(TOURNAMENT_DATE_PROPERTY, Timestamp.of(tournament.date))
             .set(TOURNAMENT_JSON_PROPERTY, StringValue.newBuilder(tournament.asJson())
                     .setExcludeFromIndexes(true)
                     .build())

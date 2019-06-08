@@ -15,6 +15,7 @@ import tournament.api.repository.Tournament
 import tournament.api.service.TournamentService
 import java.io.IOException
 import java.time.Instant
+import java.util.*
 
 class TournamentControllerTest {
 
@@ -22,7 +23,7 @@ class TournamentControllerTest {
         Tournament(
             id = "1",
             name = "Test Tournament",
-            date = Instant.parse("2019-04-30T00:00:00.0000Z"),
+            date = Date.from(Instant.parse("2019-04-30T00:00:00.0000Z")),
             rules = listOf("rule 1", "rule 2")
         )
 

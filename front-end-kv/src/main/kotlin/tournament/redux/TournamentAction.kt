@@ -9,6 +9,6 @@ sealed class TournamentAction: RAction {
     data class DownloadError(val errorMessage: String): TournamentAction()
     data class SetTournamentList(val tournaments: List<Tournament>): TournamentAction()
     data class SetSearchString(val searchString: String?): TournamentAction()
-    object NextPage: TournamentAction()
-    object PreviousPage: TournamentAction()
+    object HomePage: TournamentAction()
+    object ViewPage: TournamentAction()
 }

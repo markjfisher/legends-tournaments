@@ -2,6 +2,17 @@
 micronaut:
   application:
     name: api
+  server:
+    cors:
+      enabled: true
+#      configurations:
+#        web:
+#          allowedOrigins:
+#            - http://localhost:8088
+#          allowedMethods:
+#            - POST
+#            - PUT
+#            - GET
 ---
 tournament:
   datastore:
