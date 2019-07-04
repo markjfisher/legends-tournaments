@@ -18,12 +18,14 @@ class SimpleRepository : TournamentRepository {
             Tournament(
                 id = "1",
                 name = "tournament 1",
+                cardImage = "https://www.legends-decks.com/img_cards/cauterize.png",
                 rules = listOf("epicCount == 3", "legendCount == 1", "cardCount == 50"),
                 date = Date.from(Instant.parse("1969-03-24T06:00:00.0000Z"))
             ),
             Tournament(
                 id = "2",
                 name = "tournament 2",
+                cardImage = "https://www.legends-decks.com/img_cards/baandariopportunist.png",
                 rules = listOf("epicCount == 5", "legendCount == 5", "cardCount == 75"),
                 date = Date.from(Instant.parse("1973-04-12T12:00:00.0000Z"))
             )

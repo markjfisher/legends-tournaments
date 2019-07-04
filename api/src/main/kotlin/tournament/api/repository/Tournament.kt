@@ -13,6 +13,7 @@ import java.util.*
 data class Tournament(
     val id: String = "",
     val name: String = "",
+    val cardImage: String = "",
     @Serializable(with = DateSerializer::class)
     val date: Date = Date.from(Instant.EPOCH),
     val rules: List<String> = emptyList()
@@ -26,6 +27,6 @@ data class Tournament(
     fun asJson(): String = mapper.writeValueAsString(this)
 
     fun withId(uuid: String): Tournament {
-        return Tournament(id = uuid, name = name, date = date, rules = rules)
+        return Tournament(id = uuid, name = name, cardImage = cardImage, date = date, rules = rules)
     }
 }

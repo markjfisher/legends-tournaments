@@ -11,4 +11,5 @@ sealed class TournamentAction: RAction {
     data class SetSearchString(val searchString: String?): TournamentAction()
     object HomePage: TournamentAction()
     object ViewPage: TournamentAction()
+    object FormPage: TournamentAction()
 }

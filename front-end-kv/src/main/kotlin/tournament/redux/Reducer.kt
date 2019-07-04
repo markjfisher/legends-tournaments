@@ -6,10 +6,15 @@ import tournament.model.VIEWMODE
 
 fun tournamentStateReducer(state: TournamentState, action: TournamentAction): TournamentState = when (action) {
     is TournamentAction.HomePage -> state.copy(viewMode = VIEWMODE.HOME)
-    is TournamentAction.ViewPage -> state.copy(viewMode = VIEWMODE.VIEW)
+    is TournamentAction.ViewPage -> state.copy(viewMode = VIEWMODE.LIST_TOURNAMENTS)
+    is TournamentAction.FormPage -> state.copy(viewMode = VIEWMODE.FORM)
 
-    is TournamentAction.StartDownload -> state.copy(downloading = true)
+    is TournamentAction.StartDownload -> {
+        console.log("r: started download")
+        state.copy(downloading = true)
+    }
     is TournamentAction.DownloadOK -> {
+        console.log("r: download was ok")
         state.copy(downloading = false)
     }
     is TournamentAction.DownloadError -> state.copy(downloading = false, errorMessage = action.errorMessage)

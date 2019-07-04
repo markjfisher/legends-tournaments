@@ -1,0 +1,12 @@
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.custom-cardstyle-info-gamename {
+    /* line-height: 1.47em; */
+}
+
+.custom-cardstyle-header-image {
+    transform: translateX(-30px) translateY(-60px) scale(1.5) ;
+}

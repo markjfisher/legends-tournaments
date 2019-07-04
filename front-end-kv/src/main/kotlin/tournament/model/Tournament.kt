@@ -8,6 +8,7 @@ import kotlin.js.Date
 data class Tournament(
     val id: String,
     val name: String,
+    val cardImage: String,
     @Serializable(with = DateSerializer::class)
     val date: Date,
     val rules: List<String> = emptyList()
@@ -24,5 +25,5 @@ data class TournamentState(
 )
 
 enum class VIEWMODE {
-    HOME, VIEW;
+    HOME, LIST_TOURNAMENTS, FORM;
 }
