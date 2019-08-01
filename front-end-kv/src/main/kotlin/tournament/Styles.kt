@@ -3,13 +3,12 @@ package tournament
 import pl.treksoft.kvision.core.*
 import pl.treksoft.kvision.utils.em
 import pl.treksoft.kvision.utils.pc
-import pl.treksoft.kvision.utils.perc
 import pl.treksoft.kvision.utils.px
 import tournament.html.MyStyle.Companion.mystyle
 
 object Styles {
     val sidePanelStyle = Style {
-        width = 240.px
+        width = 220.px
         height = 100.pc
         position = Position.FIXED
         zIndex = 1
@@ -38,7 +37,7 @@ object Styles {
     }
 
     val mainStyle = Style {
-        marginLeft = 240.px
+        marginLeft = 220.px
         paddingTop = 0.px
         paddingBottom = 0.px
         paddingLeft = 0.px
@@ -48,6 +47,10 @@ object Styles {
 
     internal var cardStyle = CardStyle()
     internal class CardStyle {
+        val link = Style {
+            textDecoration =  TextDecoration(line = TextDecorationLine.NONE)
+        }
+
         val main = Style {
             width = 335.px
             minHeight = 350.px
@@ -104,6 +107,30 @@ object Styles {
         }
     }
 
+    internal var editFormStyle = EditFormStyle()
+    internal class EditFormStyle {
+        val container = Style {
+            // border = Border(width = 1.px, style = BorderStyle.SOLID, color = 0xffffff)
+//            padding = 2.px
+//            margin = 2.px
+        }
 
+        val inputPanel = Style {
+            // border = Border(width = 1.px, style = BorderStyle.DASHED, color = 0x3c3c3c)
+             padding = 2.px
+             margin = 2.px
+        }
 
+        val infoPanel = Style {
+            // border = Border(width = 1.px, style = BorderStyle.DASHED, color = 0x3c3c3c)
+            // padding = 5.px
+            // margin = 5.px
+        }
+
+        val tournamentForm = Style {
+            // border = Border(width = 1.px, style = BorderStyle.DOTTED, color = 0x888888)
+            // padding = 5.px
+            // margin = 5.px
+        }
+    }
 }

@@ -8,6 +8,12 @@ fun tournamentStateReducer(state: TournamentState, action: TournamentAction): To
     is TournamentAction.HomePage -> state.copy(viewMode = VIEWMODE.HOME)
     is TournamentAction.ViewPage -> state.copy(viewMode = VIEWMODE.LIST_TOURNAMENTS)
     is TournamentAction.FormPage -> state.copy(viewMode = VIEWMODE.FORM)
+    is TournamentAction.EditTournamentPage -> {
+        state.copy(
+            viewMode = VIEWMODE.TOURNAMENT_EDIT,
+            editTournament = state.tournaments.firstOrNull { it.id == action.tournamentId }
+        )
+    }
 
     is TournamentAction.StartDownload -> {
         console.log("r: started download")

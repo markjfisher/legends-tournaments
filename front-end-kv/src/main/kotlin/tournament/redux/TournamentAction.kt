@@ -12,4 +12,5 @@ sealed class TournamentAction: RAction {
     object HomePage: TournamentAction()
     object ViewPage: TournamentAction()
     object FormPage: TournamentAction()
+    data class EditTournamentPage(val tournamentId: String?): TournamentAction()
 }

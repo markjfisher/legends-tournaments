@@ -21,9 +21,10 @@ data class TournamentState(
     val downloading: Boolean,
     val errorMessage: String?,
     val visibleTournaments: List<Tournament>,
-    val searchString: String?
+    val searchString: String?,
+    val editTournament: Tournament?
 )
 
 enum class VIEWMODE {
-    HOME, LIST_TOURNAMENTS, FORM;
+    HOME, LIST_TOURNAMENTS, FORM, TOURNAMENT_EDIT;
 }

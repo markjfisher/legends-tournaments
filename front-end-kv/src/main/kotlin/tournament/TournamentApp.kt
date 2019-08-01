@@ -1,7 +1,10 @@
 package tournament
 
 import kotlinx.serialization.list
-import pl.treksoft.kvision.core.*
+import pl.treksoft.kvision.core.Background
+import pl.treksoft.kvision.core.BgRepeat
+import pl.treksoft.kvision.core.BgSize
+import pl.treksoft.kvision.core.Container
 import pl.treksoft.kvision.form.FormPanel.Companion.formPanel
 import pl.treksoft.kvision.form.check.CheckBox
 import pl.treksoft.kvision.form.check.Radio
@@ -20,6 +23,7 @@ import pl.treksoft.kvision.html.Div
 import pl.treksoft.kvision.html.Div.Companion.div
 import pl.treksoft.kvision.html.Image.Companion.image
 import pl.treksoft.kvision.html.Link.Companion.link
+import pl.treksoft.kvision.html.P
 import pl.treksoft.kvision.html.P.Companion.p
 import pl.treksoft.kvision.html.Span.Companion.span
 import pl.treksoft.kvision.html.TAG
@@ -31,6 +35,7 @@ import pl.treksoft.kvision.navbar.Nav.Companion.nav
 import pl.treksoft.kvision.navbar.Navbar
 import pl.treksoft.kvision.panel.*
 import pl.treksoft.kvision.panel.FlexPanel.Companion.flexPanel
+import pl.treksoft.kvision.panel.VPanel.Companion.vPanel
 import pl.treksoft.kvision.redux.ActionCreator
 import pl.treksoft.kvision.redux.StateBinding.Companion.stateBinding
 import pl.treksoft.kvision.redux.createReduxStore
@@ -39,16 +44,17 @@ import pl.treksoft.kvision.rest.RestClient
 import pl.treksoft.kvision.table.Cell.Companion.cell
 import pl.treksoft.kvision.table.Row.Companion.row
 import pl.treksoft.kvision.table.Table
-import pl.treksoft.kvision.table.Table.Companion.table
 import pl.treksoft.kvision.utils.pc
 import pl.treksoft.kvision.utils.px
-import pl.treksoft.kvision.window.Window.Companion.window
+import pl.treksoft.kvision.utils.vw
+import pl.treksoft.kvision.window.Window
 import tournament.html.Routing
 import tournament.model.Tournament
 import tournament.model.TournamentState
 import tournament.model.VIEWMODE
 import tournament.redux.TournamentAction
 import tournament.redux.tournamentStateReducer
+import kotlin.js.RegExp
 
 object TournamentApp : ApplicationBase {
     private lateinit var root: Root
@@ -61,7 +67,8 @@ object TournamentApp : ApplicationBase {
             downloading = false,
             visibleTournaments = emptyList(),
             errorMessage = null,
-            searchString = null
+            searchString = null,
+            editTournament = null
         )
     )
 
@@ -74,11 +81,18 @@ object TournamentApp : ApplicationBase {
             )
 
         root = Root("tournament") {
-            height = 100.pc
+            height = 100.vw
 
             // createNavBar(this)
             createSidePanel(this)
-            flexPanel(direction = FlexDir.COLUMN) {
+            flexPanel(
+                direction = FlexDir.COLUMN,
+//                wrap = FlexWrap.NOWRAP,
+                justify = FlexJustify.FLEXSTART
+//                alignItems = FlexAlignItems.FLEXSTART,
+//                alignContent = FlexAlignContent.STRETCH,
+//                spacing = 0
+            ) {
                 addCssClass(Styles.mainStyle)
 
                 createHeader(this)
@@ -87,6 +101,7 @@ object TournamentApp : ApplicationBase {
                         VIEWMODE.HOME -> showHome(this, state)
                         VIEWMODE.LIST_TOURNAMENTS -> listTournaments(this, state)
                         VIEWMODE.FORM -> showForm(this, state)
+                        VIEWMODE.TOURNAMENT_EDIT -> showEditTournament(this, state)
                     }
                 }
             }
@@ -104,6 +119,10 @@ object TournamentApp : ApplicationBase {
             .on("/form", { _ ->
                 store.dispatch(TournamentAction.FormPage)
                 console.log("dispatched form page")
+            })
+            .on(RegExp("/tournament/(.*)"), { id: String ->
+                store.dispatch(TournamentAction.EditTournamentPage(id))
+                console.log("dispatched edit tournament page")
             })
             .resolve()
 
@@ -128,7 +147,7 @@ object TournamentApp : ApplicationBase {
         })
     }
 
-    private fun createHeader(container: Container) {
+    private fun createHeader(container: FlexPanel) {
         container.add(Div {
             background = Background(
                 image = "/images/legends-tournaments.png",
@@ -136,11 +155,12 @@ object TournamentApp : ApplicationBase {
                 repeat = BgRepeat.NOREPEAT
             )
             // image aspect is 2500:450 = 18%
-            height = 18.pc
-        })
+            width = 85.vw
+            height = 15.vw
+        }, grow = 0)
     }
 
-    private fun createContent(container: Container): Container {
+    private fun createContent(container: FlexPanel): Container {
         val simplePanel = SimplePanel {
             p(content = "content p")
         }
@@ -170,21 +190,44 @@ object TournamentApp : ApplicationBase {
     private fun showHome(container: Container, state: TournamentState) {
         val p = VPanel {
             p(content = "home p")
-            window(
-                contentWidth = 600.px,
-                contentHeight = 300.px,
-                closeButton = false,
-                isDraggable = false,
-                isResizable = false
-            ) {
-                left = 300.px
-                top = 300.px
-                span("A window content")
-            }
-
-
         }
         container.add(p)
+    }
+
+    private fun showEditTournament(container: Container, state: TournamentState) {
+        val h = FlexPanel(
+            direction = FlexDir.ROW,
+            wrap = FlexWrap.NOWRAP,
+            justify = FlexJustify.FLEXSTART,
+            alignItems = FlexAlignItems.FLEXSTART,
+            alignContent = FlexAlignContent.STRETCH,
+            spacing = 0
+        ) {
+            addCssClass(Styles.editFormStyle.container)
+
+            add(child = Div {
+                addCssClass(Styles.editFormStyle.inputPanel)
+                p(content = "input panel")
+                formPanel<Tournament> {
+                    addCssClass(Styles.editFormStyle.tournamentForm)
+                    add(Tournament::id, Text(label = "Id").apply { placeholder = "Enter an ID" })
+                    add(Tournament::name, Text(label = "Name").apply { placeholder = "Enter a name" })
+                    add(
+                        Tournament::cardImage,
+                        Text(label = "Image URL").apply { placeholder = "Enter an image URL" })
+                    add(Tournament::date, DateTime(format = "YYYY-MM-DD hh:mm:ss", label = "Tournament Date/Time"))
+                    // how do we handle the list of rules? TextArea seems simplest. convert CRs at the server level
+                }.apply {
+                    if (state.editTournament != null) setData(state.editTournament)
+                }
+            }, grow = 3)
+
+            add(child = Div {
+                addCssClass(Styles.editFormStyle.infoPanel)
+            }, grow = 5)
+
+        }
+        container.add(h)
     }
 
     private fun showForm(container: Container, state: TournamentState) {
@@ -260,56 +303,62 @@ object TournamentApp : ApplicationBase {
         val timeStr = m.format("h:mm A z") as String
 
         container.add(
-            FlexPanel(FlexDir.ROW) {
+            child = FlexPanel(FlexDir.ROW) {
                 div {
                     addCssClass(Styles.cardStyle.main)
-                    flexPanel(direction = FlexDir.COLUMN) {
-                        addCssClass(Styles.cardStyle.panel)
-                        div {
-                            // the header image
-                            addCssClass(Styles.cardStyle.headerImageContainer)
-                            val i = image(
-                                src = tournament.cardImage,
-                                alt = tournament.name,
-                                classes = setOf("custom-cardstyle-header-image")
-                            )
-                            this.add(i)
-                        }
-                        div {
-                            // the details
-                            addCssClass(Styles.cardStyle.info.block)
-                            div(classes = setOf("custom-cardstyle-info-gamename")) {
-                                addCssClass(Styles.cardStyle.info.gameName)
-                                // The game name
-                                content = "Elder Scrolls Legends"
+                    link(label = "", url = "/#!/tournament/${tournament.id}") {
+                        addCssClass(Styles.cardStyle.link)
+                        flexPanel(direction = FlexDir.COLUMN) {
+                            addCssClass(Styles.cardStyle.panel)
+                            div {
+                                // the header image
+                                addCssClass(Styles.cardStyle.headerImageContainer)
+                                val i = image(
+                                    src = tournament.cardImage,
+                                    alt = tournament.name,
+                                    classes = setOf("custom-cardstyle-header-image")
+                                )
+                                this.add(i)
                             }
                             div {
-                                addCssClass(Styles.cardStyle.info.title)
-                                // The Title
-                                content = tournament.name
+                                // the details
+                                addCssClass(Styles.cardStyle.info.block)
+                                div(classes = setOf("custom-cardstyle-info-gamename")) {
+                                    addCssClass(Styles.cardStyle.info.gameName)
+                                    // The game name
+                                    content = "Elder Scrolls Legends"
+                                }
+                                div {
+                                    addCssClass(Styles.cardStyle.info.title)
+                                    // The Title
+                                    content = tournament.name
+                                }
+
+                                // some hr element
+                                tag(TAG.HR) {
+                                    addCssClass(Styles.cardStyle.info.hr)
+
+                                }
+
+                                // Date/Time Tables
+                                flexPanel(
+                                    direction = FlexDir.ROW,
+                                    wrap = FlexWrap.NOWRAP,
+                                    justify = FlexJustify.FLEXSTART,
+                                    alignItems = FlexAlignItems.CENTER,
+                                    alignContent = FlexAlignContent.STRETCH,
+                                    spacing = 0
+                                ) {
+                                    addCssClass(Styles.cardStyle.info.details)
+                                    add(child = createTable("DATE", dateStr, "TIME", timeStr), grow = 1)
+                                    add(
+                                        child = createTable("REGION", "Everywhere!", "TYPE", "Abell Wild Tournament"),
+                                        grow = 1
+                                    )
+                                }
+
+                                // Rules
                             }
-
-                            // some hr element
-                            tag(TAG.HR) {
-                                addCssClass(Styles.cardStyle.info.hr)
-
-                            }
-
-                            // Date/Time Tables
-                            flexPanel(
-                                direction = FlexDir.ROW,
-                                wrap = FlexWrap.NOWRAP,
-                                justify = FlexJustify.FLEXSTART,
-                                alignItems = FlexAlignItems.CENTER,
-                                alignContent = FlexAlignContent.STRETCH,
-                                spacing = 0
-                            ) {
-                                addCssClass(Styles.cardStyle.info.details)
-                                add(child = createTable("DATE", dateStr, "TIME", timeStr), grow = 1)
-                                add(child = createTable("REGION", "Everywhere!", "TYPE", "Abell Wild Tournament"), grow = 1)
-                            }
-
-                            // Rules
                         }
                     }
                 }
@@ -317,7 +366,7 @@ object TournamentApp : ApplicationBase {
         )
     }
 
-    private fun createTable(heading1: String, data1: String, heading2: String, data2: String) : Table {
+    private fun createTable(heading1: String, data1: String, heading2: String, data2: String): Table {
         return Table {
             addCssClass(Styles.cardStyle.info.table)
             row {
@@ -374,5 +423,20 @@ object TournamentApp : ApplicationBase {
                 dispatch(TournamentAction.DownloadError("Service error! $info"))
             }
         }
+    }
+
+    private fun createWindowExample(): Window {
+        return Window(
+            contentWidth = 600.px,
+            contentHeight = 300.px,
+            closeButton = false,
+            isDraggable = false,
+            isResizable = false
+        ) {
+            left = 300.px
+            top = 300.px
+            span("A window content")
+        }
+
     }
 }
